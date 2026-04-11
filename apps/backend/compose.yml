@@ -42,6 +42,27 @@ services:
       retries: 3
       start_period: 30s
 
+  vite:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    working_dir: /var/www/html
+    command: sh -c "pnpm install && pnpm run dev"
+    environment:
+      VITE_SERVER_KEY: /certs/localhost-key.pem
+      VITE_SERVER_CERT: /certs/localhost.pem
+      VITE_DEV_ORIGIN: https://localhost:5173
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/var/www/html
+      - node_modules:/var/www/html/node_modules
+      - ../../tools/dev/certs:/certs:ro
+    networks:
+      - default
+    restart: unless-stopped
+
   queue:
     build:
       context: .
@@ -69,38 +90,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: builder
-    command: ["/bin/bash", "/start.sh"]
-    environment:
-      VITE_SERVER_KEY: /certs/localhost-key.pem
-      VITE_SERVER_CERT: /certs/localhost.pem
-      DB_CONNECTION: pgsql
-      DB_HOST: postgres
-      DB_PORT: "5432"
-      DB_DATABASE: "${DB_DATABASE:-app}"
-      DB_USERNAME: "${DB_USERNAME:-app}"
-      DB_PASSWORD: "${DB_PASSWORD:-secret}"
-    env_file: .env
-    volumes:
-      - .:/var/www/html
-      - vendor:/var/www/html/vendor
-      - bootstrap_cache:/var/www/html/bootstrap/cache
-      - ../../tools/dev/certs:/certs:ro
-      - ../../tools/dev/backend/start.sh:/start.sh:ro
-    ports:
-      - "5173:5173"
-    networks:
-      - default
-    depends_on:
-      postgres:
-        condition: service_healthy
-    profiles:
-      - dev
-
   postgres:
     image: postgres:17-alpine
     environment:
@@ -124,6 +113,7 @@ volumes:
   vendor:
   bootstrap_cache:
   postgres:
+  node_modules:
 
 networks:
   default:

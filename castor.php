@@ -72,7 +72,6 @@ function dev(): void
 
     run('docker compose up -d', ctx($root, env: $baseEnv));
     run('docker compose up -d', ctx("{$root}/apps/backend", env: $baseEnv));
-    run('docker compose --profile dev up -d', ctx("{$root}/apps/backend", env: $baseEnv));
 
     run('zellij delete-session ' . SESSION . ' --force', ctx($root, allowFailure: true));
     run('zellij --session ' . SESSION . ' --new-session-with-layout ' . $root . '/tools/dev/zellij/dev.kdl', new Context(workingDirectory: $root, tty: true));

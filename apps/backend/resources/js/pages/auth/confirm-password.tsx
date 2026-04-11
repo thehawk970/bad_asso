@@ -1,51 +1,41 @@
-import { Form, Head } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { store } from '@/routes/password/confirm';
+import AuthLayout from '@/layouts/auth-layout';
 
 export default function ConfirmPassword() {
+    const { data, setData, post, processing, errors } = useForm({ password: '' });
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/user/confirm-password');
+    };
+
     return (
-        <>
-            <Head title="Confirm password" />
+        <AuthLayout
+            title="Confirmation requise"
+            description="Confirmez votre mot de passe avant de continuer."
+        >
+            <form onSubmit={submit} className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                    <Label htmlFor="password">Mot de passe</Label>
+                    <Input
+                        id="password"
+                        type="password"
+                        value={data.password}
+                        onChange={(e) => setData('password', e.target.value)}
+                        autoComplete="current-password"
+                        autoFocus
+                    />
+                    <InputError message={errors.password} />
+                </div>
 
-            <Form {...store.form()} resetOnSuccess={['password']}>
-                {({ processing, errors }) => (
-                    <div className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <PasswordInput
-                                id="password"
-                                name="password"
-                                placeholder="Password"
-                                autoComplete="current-password"
-                                autoFocus
-                            />
-
-                            <InputError message={errors.password} />
-                        </div>
-
-                        <div className="flex items-center">
-                            <Button
-                                className="w-full"
-                                disabled={processing}
-                                data-test="confirm-password-button"
-                            >
-                                {processing && <Spinner />}
-                                Confirm password
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            </Form>
-        </>
+                <Button type="submit" className="w-full" disabled={processing}>
+                    Confirmer
+                </Button>
+            </form>
+        </AuthLayout>
     );
 }
-
-ConfirmPassword.layout = {
-    title: 'Confirm your password',
-    description:
-        'This is a secure area of the application. Please confirm your password before continuing.',
-};
