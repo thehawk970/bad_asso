@@ -1,0 +1,90 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # TLS terminé par Traefik en amont
+      SSL_MODE: "off"
+      # Lance les migrations + caches Laravel au démarrage
+      AUTORUN_ENABLED: "true"
+      # Override la connexion SQLite du .env local
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_DATABASE: "${DB_DATABASE:-app}"
+      DB_USERNAME: "${DB_USERNAME:-app}"
+      DB_PASSWORD: "${DB_PASSWORD:-secret}"
+      PHP_OPCACHE_ENABLE: 1
+    env_file: .env
+    volumes:
+      - storage:/var/www/html/storage/app
+    networks:
+      - default
+      - proxy
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.app.rule: "Host(`localhost`)"
+      traefik.http.routers.app.entrypoints: "websecure"
+      traefik.http.routers.app.tls: "true"
+      traefik.http.services.app.loadbalancer.server.port: "80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost/up"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=60", "--sleep=3"]
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_DATABASE: "${DB_DATABASE:-app}"
+      DB_USERNAME: "${DB_USERNAME:-app}"
+      DB_PASSWORD: "${DB_PASSWORD:-secret}"
+      PHP_OPCACHE_ENABLE: 1
+    env_file: .env
+    volumes:
+      - storage:/var/www/html/storage/app
+    networks:
+      - default
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: "${DB_DATABASE:-app}"
+      POSTGRES_USER: "${DB_USERNAME:-app}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-secret}"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-app} -d ${DB_DATABASE:-app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  storage:
+  postgres:
+
+networks:
+  default:
+  proxy:
+    external: true
+    name: bad_proxy

@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+.nova/
+.zed/
+*.swp
+*.swo
+
+apps/studio/dist
+apps/studio/node_modules
+
+.castor.stub.php
