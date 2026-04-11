@@ -61,6 +61,8 @@ services:
       - ../../tools/dev/certs:/certs:ro
     networks:
       - default
+    healthcheck:
+      disable: true
     restart: unless-stopped
 
   queue:

@@ -62,9 +62,6 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.2.2(vite@8.0.8(@types/node@22.19.17)(jiti@2.6.1))
-      '@types/react':
-        specifier: ^19.2.0
-        version: 19.2.14
       '@types/react-dom':
         specifier: ^19.2.0
         version: 19.2.3(@types/react@19.2.14)
@@ -138,6 +135,9 @@ importers:
       '@types/node':
         specifier: ^22.13.5
         version: 22.19.17
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
       babel-plugin-react-compiler:
         specifier: ^1.0.0
         version: 1.0.0
