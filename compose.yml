@@ -1,0 +1,27 @@
+services:
+  traefik:
+    image: traefik:v3
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.minio.address=:9000"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "9000:9000"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./tools/dev/certs:/certs:ro"
+      - "./tools/dev/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    name: prescrib_proxy
+    driver: bridge
