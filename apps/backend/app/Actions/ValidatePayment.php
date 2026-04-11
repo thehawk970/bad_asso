@@ -1,0 +1,16 @@
+<?php
+
+namespace App\Actions;
+
+use App\Enums\PaymentStatus;
+use App\Models\Payment;
+
+class ValidatePayment
+{
+    public function execute(Payment $payment): Payment
+    {
+        $payment->update(['status' => PaymentStatus::Validated]);
+
+        return $payment->fresh();
+    }
+}
