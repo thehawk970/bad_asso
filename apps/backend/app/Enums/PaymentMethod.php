@@ -6,6 +6,7 @@ enum PaymentMethod: string
 {
     case Cash     = 'cash';
     case Check    = 'check';
+    case Transfer = 'transfer';
     case External = 'external';
 
     public function label(): string
@@ -13,6 +14,7 @@ enum PaymentMethod: string
         return match($this) {
             self::Cash     => 'Espèces',
             self::Check    => 'Chèque',
+            self::Transfer => 'Virement',
             self::External => 'Externe (HelloAsso…)',
         };
     }

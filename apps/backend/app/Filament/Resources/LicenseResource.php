@@ -5,12 +5,12 @@ namespace App\Filament\Resources;
 use App\Enums\LicenseStatus;
 use App\Filament\Resources\LicenseResource\Pages;
 use App\Models\License;
+use App\Models\Season;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -41,11 +41,10 @@ class LicenseResource extends Resource
                 ->searchable()
                 ->required(),
 
-            TextInput::make('season')
+            Select::make('season_id')
                 ->label('Saison')
-                ->placeholder('2025-2026')
-                ->required()
-                ->maxLength(20),
+                ->options(Season::orderBy('start_date', 'desc')->pluck('name', 'id'))
+                ->required(),
 
             Select::make('status')
                 ->label('Statut')
@@ -66,8 +65,10 @@ class LicenseResource extends Resource
                     ->sortable()
                     ->formatStateUsing(fn ($state, License $record) => $record->player->last_name . ' ' . $record->player->first_name),
 
-                TextColumn::make('season')
+                TextColumn::make('season.name')
                     ->label('Saison')
+                    ->badge()
+                    ->color('gray')
                     ->sortable(),
 
                 TextColumn::make('status')
@@ -82,6 +83,10 @@ class LicenseResource extends Resource
                     ->sortable(),
             ])
             ->filters([
+                SelectFilter::make('season')
+                    ->label('Saison')
+                    ->relationship('season', 'name'),
+
                 SelectFilter::make('status')
                     ->label('Statut')
                     ->options(collect(LicenseStatus::cases())->mapWithKeys(

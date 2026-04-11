@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['player_id', 'season', 'status'])]
+#[Fillable(['player_id', 'season_id', 'status'])]
 class License extends Model
 {
     protected function casts(): array
@@ -25,6 +25,11 @@ class License extends Model
         return $this->belongsTo(Player::class);
     }
 
+    public function season(): BelongsTo
+    {
+        return $this->belongsTo(Season::class);
+    }
+
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
     public function scopeValidated(Builder $query): Builder
@@ -37,8 +42,8 @@ class License extends Model
         return $query->where('status', LicenseStatus::Pending);
     }
 
-    public function scopeForSeason(Builder $query, string $season): Builder
+    public function scopeForSeason(Builder $query, Season $season): Builder
     {
-        return $query->where('season', $season);
+        return $query->where('season_id', $season->id);
     }
 }

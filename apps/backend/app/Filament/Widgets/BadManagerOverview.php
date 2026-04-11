@@ -7,6 +7,7 @@ use App\Enums\PaymentStatus;
 use App\Models\License;
 use App\Models\Payment;
 use App\Models\Player;
+use App\Models\Season;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -16,40 +17,53 @@ class BadManagerOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $pendingLicenses = License::where('status', LicenseStatus::Pending->value)
-            ->orWhere('status', LicenseStatus::InProgress->value)
-            ->count();
+        $currentSeason = Season::current();
 
+        // Licences non validées sur la saison en cours
+        $pendingLicensesQuery = License::whereIn('status', [
+            LicenseStatus::Pending->value,
+            LicenseStatus::InProgress->value,
+        ]);
+        if ($currentSeason) {
+            $pendingLicensesQuery->where('season_id', $currentSeason->id);
+        }
+        $pendingLicenses = $pendingLicensesQuery->count();
+
+        // Paiements en attente
         $pendingPayments = Payment::where('status', PaymentStatus::Pending->value)->count();
 
-        $playersWithoutLicense = Player::whereDoesntHave('licenses')->count();
+        // Joueurs sans licence pour la saison active
+        $playersWithoutCurrentLicense = $currentSeason
+            ? Player::whereDoesntHave('licenses', function ($q) use ($currentSeason) {
+                $q->where('season_id', $currentSeason->id);
+            })->count()
+            : Player::count();
 
+        // Paiements validés
         $validatedPayments = Payment::where('status', PaymentStatus::Validated->value)->count();
+
+        $seasonLabel = $currentSeason ? "Saison {$currentSeason->name}" : 'Aucune saison active';
 
         return [
             Stat::make('Licences non validées', $pendingLicenses)
-                ->description('En attente ou en cours')
+                ->description($seasonLabel . ' — en attente ou en cours')
                 ->descriptionIcon('heroicon-m-exclamation-circle')
-                ->color('danger')
-                ->url(route('filament.admin.resources.licenses.index', ['tableFilters[status][value]' => LicenseStatus::Pending->value])),
+                ->color('danger'),
 
             Stat::make('Paiements en attente', $pendingPayments)
                 ->description('À valider')
                 ->descriptionIcon('heroicon-m-clock')
-                ->color('warning')
-                ->url(route('filament.admin.resources.payments.index', ['tableFilters[status][value]' => PaymentStatus::Pending->value])),
+                ->color('warning'),
 
-            Stat::make('Joueurs sans licence', $playersWithoutLicense)
-                ->description('Aucune licence enregistrée')
+            Stat::make('Sans licence ' . ($currentSeason?->name ?? '—'), $playersWithoutCurrentLicense)
+                ->description('Joueurs non encore renouvelés')
                 ->descriptionIcon('heroicon-m-user-minus')
-                ->color('info')
-                ->url(route('filament.admin.resources.players.index', ['tableFilters[without_license][isActive]' => true])),
+                ->color($playersWithoutCurrentLicense > 0 ? 'danger' : 'success'),
 
             Stat::make('Paiements validés', $validatedPayments)
-                ->description('Cette saison')
+                ->description('Total')
                 ->descriptionIcon('heroicon-m-check-circle')
-                ->color('success')
-                ->url(route('filament.admin.resources.payments.index', ['tableFilters[status][value]' => PaymentStatus::Validated->value])),
+                ->color('success'),
         ];
     }
 }
