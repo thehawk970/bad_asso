@@ -8,7 +8,7 @@ use Castor\Context;
 use function Castor\capture;
 use function Castor\run;
 
-const SESSION = 'prescrib';
+const SESSION = 'bad_asso';
 
 function rootDir(): string
 {
@@ -67,13 +67,12 @@ function dev(): void
 
     $baseEnv = ['WWWUSER' => wwwUser(), 'WWWGROUP' => wwwGroup()];
 
-    run('docker compose down', ctx("{$root}/apps/studio", allowFailure: true, env: $baseEnv));
     run('docker compose down', ctx("{$root}/apps/backend", allowFailure: true, env: $baseEnv));
     run('docker compose down', ctx($root, allowFailure: true, env: $baseEnv));
 
     run('docker compose up -d', ctx($root, env: $baseEnv));
     run('docker compose up -d', ctx("{$root}/apps/backend", env: $baseEnv));
-    run('docker compose up -d', ctx("{$root}/apps/studio", env: $baseEnv));
+    run('docker compose --profile dev up -d', ctx("{$root}/apps/backend", env: $baseEnv));
 
     run('zellij delete-session ' . SESSION . ' --force', ctx($root, allowFailure: true));
     run('zellij --session ' . SESSION . ' --new-session-with-layout ' . $root . '/tools/dev/zellij/dev.kdl', new Context(workingDirectory: $root, tty: true));
@@ -84,9 +83,8 @@ function stop(): void
 {
     $root = rootDir();
 
-    run('docker compose down', ctx("{$root}/apps/studio"));
     run('docker compose down', ctx("{$root}/apps/backend"));
     run('docker compose down', ctx($root));
-    run('docker network rm prescrib_proxy', ctx($root, allowFailure: true));
+    run('docker network rm bad_proxy', ctx($root, allowFailure: true));
     run('zellij kill-session ' . SESSION, ctx($root, allowFailure: true));
 }

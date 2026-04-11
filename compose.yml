@@ -23,5 +23,5 @@ services:
 
 networks:
   proxy:
-    name: prescrib_proxy
+    name: bad_proxy
     driver: bridge

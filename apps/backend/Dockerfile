@@ -6,10 +6,11 @@ FROM serversideup/php:8.5-frankenphp AS builder
 USER root
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates curl gnupg \
+        ca-certificates curl gnupg libicu-dev inotify-tools \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && npm install -g pnpm \
+    && docker-php-ext-install intl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -40,10 +41,20 @@ RUN composer dump-autoload --no-dev --classmap-authoritative \
 # ─── Queue worker ─────────────────────────────────────────────────────────────
 FROM serversideup/php:8.5-cli AS worker
 
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends libicu-dev \
+    && docker-php-ext-install intl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 COPY --chown=www-data:www-data --from=builder /var/www/html /var/www/html
 
 
 # ─── Serveur web ──────────────────────────────────────────────────────────────
 FROM serversideup/php:8.5-frankenphp
+
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends libicu-dev \
+    && docker-php-ext-install intl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --chown=www-data:www-data --from=builder /var/www/html /var/www/html
