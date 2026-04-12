@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Filament\Resources\OrderResource\Pages;
+use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use App\Models\Product;
 use Filament\Actions\Action;
@@ -63,13 +64,6 @@ class OrderResource extends Resource
                         ->getOptionLabelUsing(fn ($value) => Player::find($value)?->full_name ?? '—')
                         ->searchable()
                         ->required(),
-
-                    Select::make('payment_method')
-                        ->label('Moyen de paiement')
-                        ->options(collect(PaymentMethod::cases())->mapWithKeys(
-                            fn (PaymentMethod $m) => [$m->value => $m->label()]
-                        ))
-                        ->nullable(),
 
                     TextInput::make('reference')
                         ->label('Référence (ex: virement REF-2025-01)')
@@ -151,9 +145,6 @@ class OrderResource extends Resource
                     TextEntry::make('total')
                         ->label('Total')
                         ->money('EUR'),
-                    TextEntry::make('payment_method')
-                        ->label('Moyen de paiement')
-                        ->formatStateUsing(fn ($state) => $state?->label() ?? '—'),
                     TextEntry::make('reference')
                         ->label('Référence')
                         ->default('—'),
@@ -215,10 +206,11 @@ class OrderResource extends Resource
                     ->money('EUR')
                     ->sortable(),
 
-                TextColumn::make('payment_method')
-                    ->label('Moyen')
-                    ->badge()
-                    ->getStateUsing(fn (Order $record) => $record->payment_method?->label() ?? '—'),
+                TextColumn::make('amount_paid')
+                    ->label('Payé')
+                    ->money('EUR')
+                    ->getStateUsing(fn (Order $record) => $record->amount_paid)
+                    ->color(fn (Order $record) => $record->amount_paid >= (float) $record->total ? 'success' : 'warning'),
 
                 TextColumn::make('status')
                     ->label('Statut')
@@ -238,11 +230,6 @@ class OrderResource extends Resource
                         fn (OrderStatus $s) => [$s->value => $s->label()]
                     )),
 
-                SelectFilter::make('payment_method')
-                    ->label('Moyen de paiement')
-                    ->options(collect(PaymentMethod::cases())->mapWithKeys(
-                        fn (PaymentMethod $m) => [$m->value => $m->label()]
-                    )),
             ])
             ->actions([
                 ViewAction::make(),
@@ -252,30 +239,18 @@ class OrderResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->hidden(fn (Order $record) => $record->status !== OrderStatus::Pending)
-                    ->requiresConfirmation()
                     ->modalHeading('Confirmer le paiement')
                     ->modalDescription(fn (Order $record) => "Valider le paiement de {$record->player?->full_name} — {$record->total} €")
                     ->form([
-                        Select::make('payment_method')
+                        Select::make('method')
                             ->label('Moyen de paiement')
                             ->options(collect(PaymentMethod::cases())->mapWithKeys(
                                 fn (PaymentMethod $m) => [$m->value => $m->label()]
                             ))
                             ->required(),
-
-                        TextInput::make('reference')
-                            ->label('Référence (facultatif)')
-                            ->nullable(),
-                    ])
-                    ->fillForm(fn (Order $record) => [
-                        'payment_method' => $record->payment_method?->value,
-                        'reference'      => $record->reference,
                     ])
                     ->action(function (Order $record, array $data): void {
-                        $licenseValidated = $record->markAsPaid(
-                            PaymentMethod::from($data['payment_method']),
-                            $data['reference'] ?? null,
-                        );
+                        $licenseValidated = $record->markAsPaid(PaymentMethod::from($data['method']));
 
                         $body = $licenseValidated
                             ? 'La licence du joueur a été validée automatiquement.'
@@ -298,6 +273,13 @@ class OrderResource extends Resource
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\PaymentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

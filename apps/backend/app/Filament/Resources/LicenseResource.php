@@ -162,25 +162,53 @@ class LicenseResource extends Resource
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->hidden(fn (License $record) => $record->status === LicenseStatus::Validated)
-                    ->action(function (License $record): void {
-                        $missing = $record->missingConditions();
+                    ->modalHeading('Mise à jour de la licence')
+                    ->modalDescription('Cochez les conditions remplies puis confirmez.')
+                    ->form(fn (License $record) => [
+                        Toggle::make('payment_confirmed')
+                            ->label('Paiement confirmé')
+                            ->inline(false)
+                            ->default($record->payment_confirmed),
 
-                        if (! empty($missing)) {
+                        Toggle::make('health_form_filled')
+                            ->label('Formulaire de santé rempli')
+                            ->inline(false)
+                            ->default($record->health_form_filled),
+
+                        Toggle::make('info_form_filled')
+                            ->label('Formulaire de renseignements rempli')
+                            ->inline(false)
+                            ->default($record->info_form_filled),
+
+                        Toggle::make('rules_signed')
+                            ->label('Règlement Poona signé')
+                            ->inline(false)
+                            ->default($record->rules_signed),
+                    ])
+                    ->action(function (License $record, array $data): void {
+                        $record->update($data);
+                        $record->refresh();
+
+                        $validated = $record->checkAndValidate();
+
+                        if ($validated) {
                             Notification::make()
-                                ->title('Validation impossible')
-                                ->body('Conditions manquantes : ' . implode(' · ', $missing))
-                                ->warning()
-                                ->persistent()
+                                ->title('Licence validée ✓')
+                                ->success()
                                 ->send();
 
                             return;
                         }
 
-                        $record->checkAndValidate();
+                        $missing = $record->missingConditions();
 
                         Notification::make()
-                            ->title('Licence validée ✓')
-                            ->success()
+                            ->title('Conditions mises à jour')
+                            ->body(empty($missing)
+                                ? 'Toutes les conditions sont remplies.'
+                                : 'Conditions restantes : ' . implode(' · ', $missing)
+                            )
+                            ->info()
                             ->send();
                     }),
 

@@ -7,11 +7,13 @@ use App\Enums\PaymentStatus;
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Models\Payment;
 use App\Models\Player;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -94,7 +96,7 @@ class PaymentResource extends Resource
                 TextColumn::make('method')
                     ->label('Méthode')
                     ->badge()
-                    ->getStateUsing(fn (Payment $record) => $record->method->label()),
+                    ->getStateUsing(fn (Payment $record) => $record->method?->label() ?? '—'),
 
                 TextColumn::make('status')
                     ->label('Statut')
@@ -126,6 +128,38 @@ class PaymentResource extends Resource
                     )),
             ])
             ->actions([
+                Action::make('validate')
+                    ->label('Valider')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->hidden(fn (Payment $record) => $record->status === PaymentStatus::Validated)
+                    ->modalHeading('Valider le paiement')
+                    ->form(fn (Payment $record) => [
+                        Select::make('method')
+                            ->label('Méthode de paiement')
+                            ->options(collect(PaymentMethod::cases())->mapWithKeys(
+                                fn (PaymentMethod $m) => [$m->value => $m->label()]
+                            ))
+                            ->default($record->method?->value)
+                            ->required(),
+                    ])
+                    ->action(function (Payment $record, array $data): void {
+                        $record->update([
+                            'status' => PaymentStatus::Validated,
+                            'method' => $data['method'],
+                        ]);
+
+                        // Déclencher la vérification de la commande associée
+                        if ($record->order) {
+                            $record->order->checkIfFullyPaid();
+                        }
+
+                        Notification::make()
+                            ->title('Paiement validé')
+                            ->success()
+                            ->send();
+                    }),
+
                 EditAction::make(),
                 DeleteAction::make(),
             ])

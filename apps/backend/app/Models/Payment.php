@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['player_id', 'amount', 'method', 'status', 'reference'])]
+#[Fillable(['player_id', 'order_id', 'amount', 'method', 'status', 'reference'])]
 class Payment extends Model
 {
     protected function casts(): array
@@ -26,6 +26,11 @@ class Payment extends Model
     public function player(): BelongsTo
     {
         return $this->belongsTo(Player::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     // ─── Scopes ─────────────────────────────────────────────────────────────────
