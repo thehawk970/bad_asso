@@ -6,6 +6,7 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Models\Payment;
+use App\Models\Player;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -37,8 +38,14 @@ class PaymentResource extends Resource
         return $schema->components([
             Select::make('player_id')
                 ->label('Joueur')
-                ->relationship('player', 'last_name')
-                ->getOptionLabelFromRecordUsing(fn ($record) => $record->last_name . ' ' . $record->first_name)
+                ->getSearchResultsUsing(fn (string $search) => Player::where('last_name', 'ilike', "%{$search}%")
+                    ->orWhere('first_name', 'ilike', "%{$search}%")
+                    ->orderBy('last_name')
+                    ->limit(50)
+                    ->get()
+                    ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name . ' ' . $p->first_name])
+                )
+                ->getOptionLabelUsing(fn ($value) => Player::find($value)?->full_name ?? '—')
                 ->searchable()
                 ->required(),
 

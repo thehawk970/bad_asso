@@ -13,9 +13,11 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use App\Models\Player;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -51,8 +53,14 @@ class OrderResource extends Resource
                 ->schema([
                     Select::make('player_id')
                         ->label('Joueur')
-                        ->relationship('player', 'last_name')
-                        ->getOptionLabelFromRecordUsing(fn ($r) => $r->last_name . ' ' . $r->first_name)
+                        ->getSearchResultsUsing(fn (string $search) => Player::where('last_name', 'ilike', "%{$search}%")
+                            ->orWhere('first_name', 'ilike', "%{$search}%")
+                            ->orderBy('last_name')
+                            ->limit(50)
+                            ->get()
+                            ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name . ' ' . $p->first_name])
+                        )
+                        ->getOptionLabelUsing(fn ($value) => Player::find($value)?->full_name ?? '—')
                         ->searchable()
                         ->required(),
 
@@ -80,11 +88,11 @@ class OrderResource extends Resource
                                 ->options(Product::active()->orderBy('name')->pluck('name', 'id'))
                                 ->required()
                                 ->live()
-                                ->afterStateUpdated(function ($state, $set) {
-                                    if ($state) {
-                                        $product = Product::find($state);
-                                        $set('unit_price', $product?->price);
-                                    }
+                                ->afterStateUpdated(function (?int $state, Set $set): void {
+                                    // Snapshot du prix au moment de la sélection
+                                    // Ce prix est stocké sur order_items.unit_price
+                                    // et n'évoluera pas si le produit change de tarif
+                                    $set('unit_price', $state ? (float) Product::find($state)?->price : null);
                                 })
                                 ->columnSpan(2),
 
@@ -94,19 +102,32 @@ class OrderResource extends Resource
                                 ->minValue(1)
                                 ->default(1)
                                 ->required()
+                                ->live()
                                 ->columnSpan(1),
 
                             TextInput::make('unit_price')
-                                ->label('Prix unitaire (€)')
+                                ->label('Prix (€)')
                                 ->numeric()
                                 ->required()
                                 ->suffix('€')
+                                ->readOnly()  // Le prix est copié depuis le catalogue, non modifiable
                                 ->columnSpan(1),
                         ])
                         ->columns(4)
-                        ->addActionLabel('Ajouter un article')
+                        ->addActionLabel('+ Ajouter un article')
                         ->minItems(1)
-                        ->reorderable(false),
+                        ->reorderable(false)
+                        ->itemLabel(function (array $state): ?string {
+                            if (! $state['product_id']) {
+                                return null;
+                            }
+                            $product = Product::find($state['product_id']);
+                            $qty     = $state['quantity'] ?? 1;
+                            $price   = $state['unit_price'] ?? 0;
+                            $sub     = number_format((float) $price * (int) $qty, 2, ',', ' ');
+
+                            return "{$product?->name} × {$qty} = {$sub} €";
+                        }),
                 ]),
         ]);
     }
@@ -138,8 +159,7 @@ class OrderResource extends Resource
                         ->default('—'),
                     TextEntry::make('paid_at')
                         ->label('Payé le')
-                        ->dateTime('d/m/Y H:i')
-                        ->default('—'),
+                        ->formatStateUsing(fn ($state) => $state?->format('d/m/Y H:i') ?? '—'),
                 ]),
 
             Section::make('Articles')
@@ -259,7 +279,7 @@ class OrderResource extends Resource
 
                         $body = $licenseValidated
                             ? 'La licence du joueur a été validée automatiquement.'
-                            : null;
+                            : 'Paiement confirmé sur la licence. Les autres conditions restent à remplir.';
 
                         Notification::make()
                             ->title("Paiement de {$record->player?->full_name} validé ({$record->total} €)")

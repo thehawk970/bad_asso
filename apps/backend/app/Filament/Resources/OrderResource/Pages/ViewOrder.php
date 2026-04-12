@@ -53,7 +53,7 @@ class ViewOrder extends ViewRecord
 
                     $body = $licenseValidated
                         ? 'La licence du joueur a été validée automatiquement.'
-                        : null;
+                        : 'Paiement confirmé sur la licence. Les autres conditions restent à remplir.';
 
                     Notification::make()
                         ->title("Commande payée — {$order->total} €")

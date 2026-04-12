@@ -92,12 +92,22 @@ class Order extends Model
             ->first();
 
         if (! $license) {
-            return false;
+            // Aucune licence en attente → on en crée une avec le paiement déjà confirmé
+            $license = $this->player->licenses()->create([
+                'season_id'         => $currentSeason?->id,
+                'status'            => LicenseStatus::InProgress,
+                'payment_confirmed' => true,
+            ]);
+        } else {
+            // Licence existante → on confirme le paiement
+            $license->update([
+                'payment_confirmed' => true,
+                'status'            => LicenseStatus::InProgress,
+            ]);
         }
 
-        $license->update(['status' => LicenseStatus::Validated]);
-
-        return true;
+        // Valider la licence seulement si toutes les autres conditions sont remplies
+        return $license->checkAndValidate();
     }
 
     // ─── Scopes ─────────────────────────────────────────────────────────────────

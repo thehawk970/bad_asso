@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\LicenseResource\Pages;
 
 use App\Filament\Resources\LicenseResource;
+use App\Models\License;
 use Filament\Actions\DeleteAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditLicense extends EditRecord
@@ -15,5 +17,19 @@ class EditLicense extends EditRecord
         return [
             DeleteAction::make(),
         ];
+    }
+
+    protected function afterSave(): void
+    {
+        /** @var License $license */
+        $license = $this->record->fresh();
+
+        if ($license->checkAndValidate()) {
+            Notification::make()
+                ->title('Licence validée automatiquement')
+                ->body('Toutes les conditions sont remplies.')
+                ->success()
+                ->send();
+        }
     }
 }
