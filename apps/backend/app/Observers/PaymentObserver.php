@@ -11,7 +11,7 @@ use App\Services\OrderService;
 
 class PaymentObserver
 {
-    public function __construct(private OrderService $orderService) {}
+    public function __construct(private readonly OrderService $orderService) {}
 
     /**
      * Quand un paiement passe en "validé", vérifier si la commande est entièrement réglée.
@@ -23,7 +23,10 @@ class PaymentObserver
             && $payment->status === PaymentStatus::Validated
             && $payment->order_id !== null
         ) {
-            $this->orderService->checkIfFullyPaid($payment->order);
+            $order = $payment->order;
+            if ($order !== null) {
+                $this->orderService->checkIfFullyPaid($order);
+            }
         }
     }
 

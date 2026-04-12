@@ -23,7 +23,7 @@ class OrderService
     {
         $this->recalculateTotal($order);
 
-        $order->items()->with('product')->each(function (OrderItem $item) use ($order): void {
+        $order->items()->with('product')->get()->each(function (OrderItem $item) use ($order): void {
             $order->payments()->create([
                 'player_id' => $order->player_id,
                 'amount'    => $item->unit_price * $item->quantity,

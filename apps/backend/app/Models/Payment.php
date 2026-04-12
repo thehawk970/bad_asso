@@ -11,12 +11,14 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 #[ObservedBy(PaymentObserver::class)]
 class Payment extends Model
 {
     protected $fillable = ['player_id', 'order_id', 'amount', 'method', 'status', 'reference'];
 
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -28,11 +30,13 @@ class Payment extends Model
 
     // ─── Relations ──────────────────────────────────────────────────────────────
 
+    /** @return BelongsTo<Player, $this> */
     public function player(): BelongsTo
     {
         return $this->belongsTo(Player::class);
     }
 
+    /** @return BelongsTo<Order, $this> */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
@@ -40,12 +44,14 @@ class Payment extends Model
 
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
-    public function scopeValidated(Builder $query): Builder
+    /** @param Builder<Payment> $query */
+    public function scopeValidated(Builder $query): Builder<Payment>
     {
         return $query->where('status', PaymentStatus::Validated);
     }
 
-    public function scopePending(Builder $query): Builder
+    /** @param Builder<Payment> $query */
+    public function scopePending(Builder $query): Builder<Payment>
     {
         return $query->where('status', PaymentStatus::Pending);
     }

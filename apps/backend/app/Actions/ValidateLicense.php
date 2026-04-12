@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\LicenseStatus;
 use App\Models\License;
 
 class ValidateLicense
@@ -21,8 +22,9 @@ class ValidateLicense
             );
         }
 
-        $license->update(['status' => \App\Enums\LicenseStatus::Validated]);
+        $license->update(['status' => LicenseStatus::Validated]);
+        $license->refresh();
 
-        return $license->fresh();
+        return $license;
     }
 }

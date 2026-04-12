@@ -2,7 +2,9 @@ includes:
     - vendor/larastan/larastan/extension.neon
 
 parameters:
-    level: 5
+    level: 9
+
+    treatPhpDocTypesAsCertain: false
 
     paths:
         - app

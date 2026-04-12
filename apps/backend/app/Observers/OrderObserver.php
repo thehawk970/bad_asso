@@ -10,7 +10,7 @@ use App\Services\LicenseService;
 
 class OrderObserver
 {
-    public function __construct(private LicenseService $licenseService) {}
+    public function __construct(private readonly LicenseService $licenseService) {}
 
     /**
      * Quand une commande passe en "payée", confirmer le paiement sur la licence

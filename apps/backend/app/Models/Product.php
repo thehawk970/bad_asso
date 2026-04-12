@@ -7,11 +7,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 class Product extends Model
 {
     protected $fillable = ['name', 'price', 'description', 'is_active', 'is_license_product'];
 
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -21,12 +23,14 @@ class Product extends Model
         ];
     }
 
+    /** @return HasMany<OrderItem, $this> */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function scopeActive(Builder $query): Builder
+    /** @param Builder<Product> $query */
+    public function scopeActive(Builder $query): Builder<Product>
     {
         return $query->where('is_active', true);
     }

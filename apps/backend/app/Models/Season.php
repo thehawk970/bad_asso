@@ -6,11 +6,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Override;
 
 class Season extends Model
 {
     protected $fillable = ['name', 'start_date', 'end_date', 'is_active'];
 
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -22,6 +24,7 @@ class Season extends Model
 
     // ─── Relations ──────────────────────────────────────────────────────────────
 
+    /** @return HasMany<License, $this> */
     public function licenses(): HasMany
     {
         return $this->hasMany(License::class);

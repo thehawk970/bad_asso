@@ -8,6 +8,7 @@ use App\Enums\LicenseStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Override;
 
 class License extends Model
 {
@@ -21,6 +22,7 @@ class License extends Model
         'rules_signed',
     ];
 
+    #[Override]
     protected function casts(): array
     {
         return [
@@ -34,11 +36,13 @@ class License extends Model
 
     // ─── Relations ──────────────────────────────────────────────────────────────
 
+    /** @return BelongsTo<Player, $this> */
     public function player(): BelongsTo
     {
         return $this->belongsTo(Player::class);
     }
 
+    /** @return BelongsTo<Season, $this> */
     public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
@@ -88,17 +92,20 @@ class License extends Model
 
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
-    public function scopeValidated(Builder $query): Builder
+    /** @param Builder<License> $query */
+    public function scopeValidated(Builder $query): Builder<License>
     {
         return $query->where('status', LicenseStatus::Validated);
     }
 
-    public function scopePending(Builder $query): Builder
+    /** @param Builder<License> $query */
+    public function scopePending(Builder $query): Builder<License>
     {
         return $query->where('status', LicenseStatus::Pending);
     }
 
-    public function scopeForSeason(Builder $query, Season $season): Builder
+    /** @param Builder<License> $query */
+    public function scopeForSeason(Builder $query, Season $season): Builder<License>
     {
         return $query->where('season_id', $season->id);
     }

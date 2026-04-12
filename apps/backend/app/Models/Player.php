@@ -11,22 +11,30 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property-read string $full_name
+ * @property-read bool $has_valid_license
+ * @property-read bool $has_valid_payment
+ */
 class Player extends Model
 {
     protected $fillable = ['first_name', 'last_name', 'email', 'phone'];
 
     // ─── Relations ──────────────────────────────────────────────────────────────
 
+    /** @return HasMany<License, $this> */
     public function licenses(): HasMany
     {
         return $this->hasMany(License::class);
     }
 
+    /** @return HasMany<Payment, $this> */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
+    /** @return HasMany<Order, $this> */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
@@ -34,47 +42,60 @@ class Player extends Model
 
     // ─── Accessors ──────────────────────────────────────────────────────────────
 
-    public function getFullNameAttribute(): string
+    /** @return Attribute<string, never> */
+    protected function fullName(): Attribute
     {
-        return "{$this->first_name} {$this->last_name}";
+        return Attribute::make(
+            get: fn (): string => "{$this->first_name} {$this->last_name}",
+        );
     }
 
-    public function getHasValidLicenseAttribute(): bool
+    /** @return Attribute<bool, never> */
+    protected function hasValidLicense(): Attribute
     {
-        return $this->licenses()
-            ->where('status', LicenseStatus::Validated->value)
-            ->exists();
+        return Attribute::make(
+            get: fn (): bool => $this->licenses()
+                ->where('status', LicenseStatus::Validated->value)
+                ->exists(),
+        );
     }
 
-    public function getHasValidPaymentAttribute(): bool
+    /** @return Attribute<bool, never> */
+    protected function hasValidPayment(): Attribute
     {
-        return $this->payments()
-            ->where('status', PaymentStatus::Validated->value)
-            ->exists();
+        return Attribute::make(
+            get: fn (): bool => $this->payments()
+                ->where('status', PaymentStatus::Validated->value)
+                ->exists(),
+        );
     }
 
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
-    public function scopeWithPendingPayments(Builder $query): Builder
+    /** @param Builder<Player> $query */
+    public function scopeWithPendingPayments(Builder $query): Builder<Player>
     {
         return $query->whereHas('payments', function (Builder $q) {
             $q->where('status', PaymentStatus::Pending->value);
         });
     }
 
-    public function scopeWithoutValidatedLicense(Builder $query): Builder
+    /** @param Builder<Player> $query */
+    public function scopeWithoutValidatedLicense(Builder $query): Builder<Player>
     {
         return $query->whereDoesntHave('licenses', function (Builder $q) {
             $q->where('status', LicenseStatus::Validated->value);
         });
     }
 
-    public function scopeWithoutAnyLicense(Builder $query): Builder
+    /** @param Builder<Player> $query */
+    public function scopeWithoutAnyLicense(Builder $query): Builder<Player>
     {
         return $query->whereDoesntHave('licenses');
     }
 
-    public function scopeSearch(Builder $query, string $search): Builder
+    /** @param Builder<Player> $query */
+    public function scopeSearch(Builder $query, string $search): Builder<Player>
     {
         return $query->where(function (Builder $q) use ($search) {
             $q->where('first_name', 'ilike', "%{$search}%")

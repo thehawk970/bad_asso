@@ -23,19 +23,25 @@ class LicenseService
             return;
         }
 
+        $player = $order->player;
+        if ($player === null) {
+            return;
+        }
+
         $currentSeason = Season::current();
 
-        $exists = $order->player->licenses()
+        $seasonId = $currentSeason?->id;
+        $exists = $player->licenses()
             ->when(
-                $currentSeason,
-                fn (Builder $q) => $q->where('season_id', $currentSeason->id),
+                $seasonId !== null,
+                fn (Builder $q) => $q->where('season_id', $seasonId),
                 fn (Builder $q) => $q->latest(),
             )
             ->whereIn('status', [LicenseStatus::Pending->value, LicenseStatus::InProgress->value])
             ->exists();
 
         if (! $exists) {
-            $order->player->licenses()->create([
+            $player->licenses()->create([
                 'season_id'         => $currentSeason?->id,
                 'status'            => LicenseStatus::Pending,
                 'payment_confirmed' => false,
@@ -55,19 +61,25 @@ class LicenseService
             return false;
         }
 
-        $currentSeason = Season::current();
+        $player = $order->player;
+        if ($player === null) {
+            return false;
+        }
 
-        $license = $order->player->licenses()
+        $currentSeason = Season::current();
+        $seasonId = $currentSeason?->id;
+
+        $license = $player->licenses()
             ->when(
-                $currentSeason,
-                fn (Builder $q) => $q->where('season_id', $currentSeason->id),
+                $seasonId !== null,
+                fn (Builder $q) => $q->where('season_id', $seasonId),
                 fn (Builder $q) => $q->latest(),
             )
             ->whereIn('status', [LicenseStatus::Pending->value, LicenseStatus::InProgress->value])
             ->first();
 
         if (! $license) {
-            $license = $order->player->licenses()->create([
+            $license = $player->licenses()->create([
                 'season_id'         => $currentSeason?->id,
                 'status'            => LicenseStatus::InProgress,
                 'payment_confirmed' => true,

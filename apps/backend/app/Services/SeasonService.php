@@ -12,6 +12,9 @@ class SeasonService
      * Crée une nouvelle saison et l'active immédiatement.
      * Retourne null si une saison avec ce nom existe déjà.
      */
+    /**
+     * @param  array{name: string, start_date: string, end_date: string}  $data
+     */
     public function createAndActivate(array $data): ?Season
     {
         if (Season::where('name', $data['name'])->exists()) {

@@ -12,7 +12,8 @@ class ValidatePayment
     public function execute(Payment $payment): Payment
     {
         $payment->update(['status' => PaymentStatus::Validated]);
+        $payment->refresh();
 
-        return $payment->fresh();
+        return $payment;
     }
 }
