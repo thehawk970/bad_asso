@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Filament\Resources\OrderResource\Pages;
+use App\Services\OrderService;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use App\Models\Product;
@@ -250,15 +251,13 @@ class OrderResource extends Resource
                             ->required(),
                     ])
                     ->action(function (Order $record, array $data): void {
-                        $licenseValidated = $record->markAsPaid(PaymentMethod::from($data['method']));
-
-                        $body = $licenseValidated
-                            ? 'La licence du joueur a été validée automatiquement.'
-                            : 'Paiement confirmé sur la licence. Les autres conditions restent à remplir.';
+                        app(OrderService::class)->markAsPaid(
+                            $record,
+                            PaymentMethod::from($data['method']),
+                        );
 
                         Notification::make()
                             ->title("Paiement de {$record->player?->full_name} validé ({$record->total} €)")
-                            ->body($body)
                             ->success()
                             ->send();
                     }),

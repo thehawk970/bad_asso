@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LicenseResource\Pages;
 
 use App\Filament\Resources\LicenseResource;
 use App\Models\License;
+use App\Services\LicenseService;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -24,7 +25,7 @@ class EditLicense extends EditRecord
         /** @var License $license */
         $license = $this->record->fresh();
 
-        if ($license->checkAndValidate()) {
+        if (app(LicenseService::class)->updateConditionsAndValidate($license, [])) {
             Notification::make()
                 ->title('Licence validée automatiquement')
                 ->body('Toutes les conditions sont remplies.')

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
 use App\Models\Order;
+use App\Services\OrderService;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
@@ -20,6 +21,7 @@ class EditOrder extends EditRecord
     {
         /** @var Order $order */
         $order = $this->record;
-        $order->recalculateTotal();
+
+        app(OrderService::class)->recalculateTotal($order);
     }
 }

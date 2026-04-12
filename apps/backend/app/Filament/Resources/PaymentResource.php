@@ -7,6 +7,7 @@ use App\Enums\PaymentStatus;
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Models\Payment;
 use App\Models\Player;
+use App\Services\PaymentService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -144,15 +145,10 @@ class PaymentResource extends Resource
                             ->required(),
                     ])
                     ->action(function (Payment $record, array $data): void {
-                        $record->update([
-                            'status' => PaymentStatus::Validated,
-                            'method' => $data['method'],
-                        ]);
-
-                        // Déclencher la vérification de la commande associée
-                        if ($record->order) {
-                            $record->order->checkIfFullyPaid();
-                        }
+                        app(PaymentService::class)->validate(
+                            $record,
+                            PaymentMethod::from($data['method']),
+                        );
 
                         Notification::make()
                             ->title('Paiement validé')

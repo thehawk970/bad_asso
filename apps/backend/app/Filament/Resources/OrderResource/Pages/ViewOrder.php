@@ -6,10 +6,10 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Filament\Resources\OrderResource;
 use App\Models\Order;
+use App\Services\OrderService;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -28,40 +28,28 @@ class ViewOrder extends ViewRecord
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->hidden(fn () => $order->status !== OrderStatus::Pending)
-                ->requiresConfirmation()
+                ->modalHeading('Confirmer le paiement')
+                ->modalDescription(fn () => "Valider le paiement de {$order->player?->full_name} — {$order->total} €")
                 ->form([
-                    Select::make('payment_method')
+                    Select::make('method')
                         ->label('Moyen de paiement')
                         ->options(collect(PaymentMethod::cases())->mapWithKeys(
                             fn (PaymentMethod $m) => [$m->value => $m->label()]
                         ))
                         ->required(),
-
-                    TextInput::make('reference')
-                        ->label('Référence (facultatif)')
-                        ->nullable(),
-                ])
-                ->fillForm(fn () => [
-                    'payment_method' => $order->payment_method?->value,
-                    'reference'      => $order->reference,
                 ])
                 ->action(function (array $data) use ($order): void {
-                    $licenseValidated = $order->markAsPaid(
-                        PaymentMethod::from($data['payment_method']),
-                        $data['reference'] ?? null,
+                    app(OrderService::class)->markAsPaid(
+                        $order,
+                        PaymentMethod::from($data['method']),
                     );
-
-                    $body = $licenseValidated
-                        ? 'La licence du joueur a été validée automatiquement.'
-                        : 'Paiement confirmé sur la licence. Les autres conditions restent à remplir.';
 
                     Notification::make()
                         ->title("Commande payée — {$order->total} €")
-                        ->body($body)
                         ->success()
                         ->send();
 
-                    $this->refreshFormData(['status', 'paid_at', 'payment_method']);
+                    $this->refreshFormData(['status', 'paid_at']);
                 }),
 
             EditAction::make()

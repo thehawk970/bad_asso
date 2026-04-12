@@ -4,14 +4,12 @@ namespace App\Filament\Resources\OrderResource\RelationManagers;
 
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
-use App\Models\Order;
 use App\Models\Payment;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -89,32 +87,17 @@ class PaymentsRelationManager extends RelationManager
                 CreateAction::make()
                     ->label('Ajouter un paiement')
                     ->mutateFormDataUsing(function (array $data): array {
-                        // Associer automatiquement le joueur de la commande
                         $data['player_id'] = $this->getOwnerRecord()->player_id;
                         return $data;
-                    })
-                    ->after(function (): void {
-                        $this->checkOrderPayment();
                     }),
             ])
             ->actions([
-                EditAction::make()
-                    ->after(function (): void {
-                        $this->checkOrderPayment();
-                    }),
-
-                DeleteAction::make()
-                    ->after(function (): void {
-                        // Si un paiement est supprimé et la commande était payée, repasser en pending
-                        /** @var Order $order */
-                        $order = $this->getOwnerRecord();
-                        if ($order->status->value === 'paid' && $order->remaining_amount > 0) {
-                            $order->update(['status' => 'pending', 'paid_at' => null]);
-                        }
-                    }),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->emptyStateDescription('Aucun paiement enregistré pour cette commande.')
             ->description(function (): string {
+
                 /** @var Order $order */
                 $order = $this->getOwnerRecord();
                 $paid  = number_format($order->amount_paid, 2, ',', ' ');
@@ -127,19 +110,5 @@ class PaymentsRelationManager extends RelationManager
 
                 return "Total : {$total} € — Payé : {$paid} € — Reste : {$remaining} €";
             });
-    }
-
-    private function checkOrderPayment(): void
-    {
-        /** @var Order $order */
-        $order = $this->getOwnerRecord();
-
-        if ($order->checkIfFullyPaid()) {
-            Notification::make()
-                ->title('Commande entièrement réglée')
-                ->body('La licence du joueur a été mise à jour automatiquement.')
-                ->success()
-                ->send();
-        }
     }
 }

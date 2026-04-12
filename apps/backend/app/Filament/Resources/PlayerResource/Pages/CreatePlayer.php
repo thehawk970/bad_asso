@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\PlayerResource\Pages;
 
-use App\Enums\LicenseStatus;
 use App\Filament\Resources\PlayerResource;
 use App\Models\Season;
+use App\Services\LicenseService;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -26,10 +26,7 @@ class CreatePlayer extends CreateRecord
             return;
         }
 
-        $this->record->licenses()->create([
-            'season_id' => $season->id,
-            'status'    => LicenseStatus::Pending,
-        ]);
+        app(LicenseService::class)->createPendingForPlayer($this->record, $season);
 
         Notification::make()
             ->title("Licence {$season->name} créée automatiquement")

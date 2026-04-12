@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SeasonResource\Pages;
 
 use App\Filament\Resources\SeasonResource;
 use App\Models\Season;
+use App\Services\SeasonService;
 use Carbon\Carbon;
 use Filament\Actions\CreateAction;
 use Filament\Actions\Action;
@@ -63,7 +64,9 @@ class ListSeasons extends ListRecords
                         ->displayFormat('d/m/Y'),
                 ])
                 ->action(function (array $data): void {
-                    if (Season::where('name', $data['name'])->exists()) {
+                    $season = app(SeasonService::class)->createAndActivate($data);
+
+                    if (! $season) {
                         Notification::make()
                             ->title("La saison {$data['name']} existe déjà")
                             ->warning()
@@ -71,16 +74,6 @@ class ListSeasons extends ListRecords
 
                         return;
                     }
-
-                    $season = Season::create([
-                        'name'       => $data['name'],
-                        'start_date' => $data['start_date'],
-                        'end_date'   => $data['end_date'],
-                        'is_active'  => false,
-                    ]);
-
-                    // Active la nouvelle saison (désactive les autres)
-                    $season->activate();
 
                     Notification::make()
                         ->title("Saison {$season->name} créée et activée")

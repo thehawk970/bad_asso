@@ -186,10 +186,8 @@ class LicenseResource extends Resource
                             ->default($record->rules_signed),
                     ])
                     ->action(function (License $record, array $data): void {
-                        $record->update($data);
-                        $record->refresh();
-
-                        $validated = $record->checkAndValidate();
+                        $validated = app(\App\Services\LicenseService::class)
+                            ->updateConditionsAndValidate($record, $data);
 
                         if ($validated) {
                             Notification::make()

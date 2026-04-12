@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\LicenseStatus;
 use App\Enums\PaymentStatus;
 use App\Filament\Resources\PlayerResource\Pages;
 use App\Models\Player;
@@ -229,22 +228,15 @@ class PlayerResource extends Resource
                             return;
                         }
 
-                        $alreadyExists = $record->licenses()
-                            ->where('season_id', $season->id)
-                            ->exists();
+                        $license = app(\App\Services\LicenseService::class)->renewForPlayer($record, $season);
 
-                        if ($alreadyExists) {
+                        if (! $license) {
                             Notification::make()
                                 ->title("Licence {$season->name} déjà existante pour ce joueur")
                                 ->warning()
                                 ->send();
                             return;
                         }
-
-                        $record->licenses()->create([
-                            'season_id' => $season->id,
-                            'status'    => LicenseStatus::Pending,
-                        ]);
 
                         Notification::make()
                             ->title("Licence {$season->name} créée")
