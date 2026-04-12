@@ -1,0 +1,15 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+
+    paths:
+        - app
+        - database
+        - tests
+
+    excludePaths:
+        - vendor
+        - storage
+        - bootstrap/cache
