@@ -4,14 +4,14 @@ namespace App\Models;
 
 use App\Enums\LicenseStatus;
 use App\Enums\PaymentStatus;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['first_name', 'last_name', 'email', 'phone'])]
 class Player extends Model
 {
+    protected $fillable = ['first_name', 'last_name', 'email', 'phone'];
+
     // ─── Relations ──────────────────────────────────────────────────────────────
 
     public function licenses(): HasMany

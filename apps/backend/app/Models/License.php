@@ -3,22 +3,22 @@
 namespace App\Models;
 
 use App\Enums\LicenseStatus;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable([
-    'player_id',
-    'season_id',
-    'status',
-    'payment_confirmed',
-    'health_form_filled',
-    'info_form_filled',
-    'rules_signed',
-])]
 class License extends Model
 {
+    protected $fillable = [
+        'player_id',
+        'season_id',
+        'status',
+        'payment_confirmed',
+        'health_form_filled',
+        'info_form_filled',
+        'rules_signed',
+    ];
+
     protected function casts(): array
     {
         return [

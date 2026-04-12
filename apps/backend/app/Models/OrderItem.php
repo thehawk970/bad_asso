@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['order_id', 'product_id', 'quantity', 'unit_price'])]
 class OrderItem extends Model
 {
+    protected $fillable = ['order_id', 'product_id', 'quantity', 'unit_price'];
+
     protected function casts(): array
     {
         return [

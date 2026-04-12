@@ -5,16 +5,16 @@ namespace App\Models;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Observers\PaymentObserver;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[ObservedBy(PaymentObserver::class)]
-#[Fillable(['player_id', 'order_id', 'amount', 'method', 'status', 'reference'])]
 class Payment extends Model
 {
+    protected $fillable = ['player_id', 'order_id', 'amount', 'method', 'status', 'reference'];
+
     protected function casts(): array
     {
         return [
