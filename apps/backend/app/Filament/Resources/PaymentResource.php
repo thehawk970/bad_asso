@@ -128,14 +128,14 @@ class PaymentResource extends Resource
                         fn (PaymentStatus $s) => [$s->value => $s->label()]
                     )),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('validate')
                     ->label('Valider')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->hidden(fn (Payment $record) => $record->status === PaymentStatus::Validated)
                     ->modalHeading('Valider le paiement')
-                    ->form(fn (Payment $record) => [
+                    ->schema(fn (Payment $record) => [
                         Select::make('method')
                             ->label('Méthode de paiement')
                             ->options(collect(PaymentMethod::cases())->mapWithKeys(
@@ -159,7 +159,7 @@ class PaymentResource extends Resource
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

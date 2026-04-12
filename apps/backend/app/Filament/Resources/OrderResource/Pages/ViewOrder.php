@@ -30,7 +30,7 @@ class ViewOrder extends ViewRecord
                 ->hidden(fn () => $order->status !== OrderStatus::Pending)
                 ->modalHeading('Confirmer le paiement')
                 ->modalDescription(fn () => "Valider le paiement de {$order->player?->full_name} — {$order->total} €")
-                ->form([
+                ->schema([
                     Select::make('method')
                         ->label('Moyen de paiement')
                         ->options(collect(PaymentMethod::cases())->mapWithKeys(

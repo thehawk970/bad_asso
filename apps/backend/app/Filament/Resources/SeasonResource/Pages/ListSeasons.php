@@ -47,7 +47,7 @@ class ListSeasons extends ListRecords
                         'end_date'   => $nextEnd->toDateString(),
                     ];
                 })
-                ->form([
+                ->schema([
                     TextInput::make('name')
                         ->label('Nom de la saison (ex: 26-27)')
                         ->required()

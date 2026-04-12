@@ -156,7 +156,7 @@ class LicenseResource extends Resource
                         fn (LicenseStatus $s) => [$s->value => $s->label()]
                     )),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('validate')
                     ->label('Valider')
                     ->icon('heroicon-o-check-badge')
@@ -164,7 +164,7 @@ class LicenseResource extends Resource
                     ->hidden(fn (License $record) => $record->status === LicenseStatus::Validated)
                     ->modalHeading('Mise à jour de la licence')
                     ->modalDescription('Cochez les conditions remplies puis confirmez.')
-                    ->form(fn (License $record) => [
+                    ->schema(fn (License $record) => [
                         Toggle::make('payment_confirmed')
                             ->label('Paiement confirmé')
                             ->inline(false)
@@ -213,7 +213,7 @@ class LicenseResource extends Resource
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

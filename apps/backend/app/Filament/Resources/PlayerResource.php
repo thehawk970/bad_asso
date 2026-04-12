@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\LicenseStatus;
 use App\Enums\PaymentStatus;
 use App\Filament\Resources\PlayerResource\Pages;
 use App\Models\Player;
@@ -200,10 +201,10 @@ class PlayerResource extends Resource
                 Filter::make('no_validated_license')
                     ->label('Licence non validée')
                     ->query(fn (Builder $q) => $q->whereDoesntHave('licenses', function (Builder $sub) {
-                        $sub->where('status', LicenseStatus::Validated->value);
+                            $sub->where('status', LicenseStatus::Validated->value);
                     })),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
                 Action::make('renew')
@@ -244,7 +245,7 @@ class PlayerResource extends Resource
                             ->send();
                     }),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

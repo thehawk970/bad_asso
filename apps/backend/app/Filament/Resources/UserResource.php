@@ -96,11 +96,11 @@ class UserResource extends Resource
                     ->label('Email non vérifié')
                     ->query(fn (Builder $query) => $query->whereNull('email_verified_at')),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

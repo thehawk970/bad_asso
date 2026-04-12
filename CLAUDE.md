@@ -110,6 +110,18 @@ Select::make('player_id')
     ->searchable()
 ```
 
+### Actions sur les lignes de table
+Utiliser `->recordActions([...])` et non `->actions([...])` (deprecated en v5).
+
+### Actions de la barre d'outils (bulk actions)
+Utiliser `->toolbarActions([...])` et non `->bulkActions([...])` (deprecated en v5).
+
+### Mutation des données dans les Actions
+Utiliser `->mutateDataUsing(...)` et non `->mutateFormDataUsing(...)` (deprecated en v5).
+
+### Schema dans les modales d'Action
+Utiliser `->schema([...])` et non `->form([...])` (deprecated en v5).
+
 ### Infolist au niveau resource
 Déclarer `infolist(Schema $schema)` sur le `Resource`, pas sur la page `ViewXxx`.
 

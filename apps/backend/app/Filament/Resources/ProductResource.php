@@ -105,12 +105,12 @@ class ProductResource extends Resource
                     ->query(fn (Builder $q) => $q->where('is_active', true))
                     ->default(),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
                     ->disabled(fn (Product $record) => $record->orderItems()->exists()),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

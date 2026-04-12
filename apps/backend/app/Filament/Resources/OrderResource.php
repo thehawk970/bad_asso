@@ -80,7 +80,7 @@ class OrderResource extends Resource
                         ->schema([
                             Select::make('product_id')
                                 ->label('Produit')
-                                ->options(Product::active()->orderBy('name')->pluck('name', 'id'))
+                                ->options(fn () => Product::where('is_active', true)->orderBy('name')->pluck('name', 'id'))
                                 ->required()
                                 ->live()
                                 ->afterStateUpdated(function (?int $state, Set $set): void {
@@ -232,7 +232,7 @@ class OrderResource extends Resource
                     )),
 
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
 
                 Action::make('mark_paid')
@@ -242,7 +242,7 @@ class OrderResource extends Resource
                     ->hidden(fn (Order $record) => $record->status !== OrderStatus::Pending)
                     ->modalHeading('Confirmer le paiement')
                     ->modalDescription(fn (Order $record) => "Valider le paiement de {$record->player?->full_name} — {$record->total} €")
-                    ->form([
+                    ->schema([
                         Select::make('method')
                             ->label('Moyen de paiement')
                             ->options(collect(PaymentMethod::cases())->mapWithKeys(
@@ -266,7 +266,7 @@ class OrderResource extends Resource
                 DeleteAction::make()
                     ->hidden(fn (Order $record) => $record->status === OrderStatus::Paid),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

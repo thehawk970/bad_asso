@@ -93,7 +93,7 @@ class SeasonResource extends Resource
                     ->trueColor('success')
                     ->falseColor('gray'),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('activate')
                     ->label('Activer')
                     ->icon('heroicon-o-check-circle')
@@ -112,7 +112,7 @@ class SeasonResource extends Resource
 
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
