@@ -18,7 +18,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Player extends Model
 {
-    protected $fillable = ['first_name', 'last_name', 'email', 'phone'];
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'email',
+        'phone',
+        'ffbad_license_number',
+        'birth_date',
+        'ffbad_category',
+    ];
+
+    protected $casts = [
+        'birth_date' => 'date',
+    ];
 
     // ─── Relations ──────────────────────────────────────────────────────────────
 

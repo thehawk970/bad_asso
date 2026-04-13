@@ -17,6 +17,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -70,6 +71,22 @@ class PlayerResource extends Resource
                 ->tel()
                 ->nullable()
                 ->maxLength(20),
+
+            TextInput::make('ffbad_license_number')
+                ->label('N° licence FFBad')
+                ->nullable()
+                ->unique(ignoreRecord: true)
+                ->maxLength(20),
+
+            DatePicker::make('birth_date')
+                ->label('Date de naissance')
+                ->nullable()
+                ->displayFormat('d/m/Y'),
+
+            TextInput::make('ffbad_category')
+                ->label('Catégorie')
+                ->nullable()
+                ->maxLength(50),
         ]);
     }
 
@@ -85,6 +102,11 @@ class PlayerResource extends Resource
                     TextEntry::make('last_name')->label('Nom'),
                     TextEntry::make('email')->label('Email')->default('—'),
                     TextEntry::make('phone')->label('Téléphone')->default('—'),
+                    TextEntry::make('ffbad_license_number')->label('N° licence FFBad')->default('—'),
+                    TextEntry::make('birth_date')
+                        ->label('Date de naissance')
+                        ->formatStateUsing(fn ($state) => $state?->format('d/m/Y') ?? '—'),
+                    TextEntry::make('ffbad_category')->label('Catégorie')->default('—'),
                     TextEntry::make('created_at')->label('Inscrit le')->dateTime('d/m/Y'),
                 ]),
 
@@ -137,6 +159,23 @@ class PlayerResource extends Resource
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(['last_name'])
                     ->getStateUsing(fn (Player $record) => $record->last_name.' '.$record->first_name),
+
+                TextColumn::make('ffbad_license_number')
+                    ->label('N° licence')
+                    ->searchable()
+                    ->default('—')
+                    ->toggleable(),
+
+                TextColumn::make('birth_date')
+                    ->label('Naissance')
+                    ->formatStateUsing(fn ($state) => $state?->format('d/m/Y') ?? '—')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('ffbad_category')
+                    ->label('Catégorie')
+                    ->badge()
+                    ->default('—')
+                    ->toggleable(),
 
                 TextColumn::make('email')
                     ->label('Email')
