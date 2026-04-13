@@ -24,10 +24,11 @@ class EditLicense extends EditRecord
 
     protected function afterSave(): void
     {
-        /** @var License $license */
-        $license = $this->record->fresh();
+        /** @var License $record */
+        $record = $this->record;
+        $record->refresh();
 
-        if (app(LicenseService::class)->updateConditionsAndValidate($license, [])) {
+        if (app(LicenseService::class)->updateConditionsAndValidate($record, [])) {
             Notification::make()
                 ->title('Licence validée automatiquement')
                 ->body('Toutes les conditions sont remplies.')

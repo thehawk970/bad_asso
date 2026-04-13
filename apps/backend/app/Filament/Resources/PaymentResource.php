@@ -50,7 +50,11 @@ class PaymentResource extends Resource
                     ->get()
                     ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name . ' ' . $p->first_name])
                 )
-                ->getOptionLabelUsing(fn ($value) => Player::find($value)?->full_name ?? '—')
+                ->getOptionLabelUsing(function (int|string $value): string {
+                    $player = Player::where('id', $value)->first();
+
+                    return $player !== null ? $player->full_name : '—';
+                })
                 ->searchable()
                 ->required(),
 
@@ -89,7 +93,11 @@ class PaymentResource extends Resource
                     ->label('Joueur')
                     ->searchable()
                     ->sortable()
-                    ->formatStateUsing(fn ($state, Payment $record) => $record->player->last_name . ' ' . $record->player->first_name),
+                    ->formatStateUsing(function ($state, Payment $record): string {
+                        $player = $record->player;
+
+                        return $player !== null ? $player->last_name . ' ' . $player->first_name : '—';
+                    }),
 
                 TextColumn::make('amount')
                     ->label('Montant')

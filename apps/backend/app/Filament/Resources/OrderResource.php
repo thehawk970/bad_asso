@@ -64,7 +64,11 @@ class OrderResource extends Resource
                             ->get()
                             ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name . ' ' . $p->first_name])
                         )
-                        ->getOptionLabelUsing(fn ($value) => Player::find($value)?->full_name ?? '—')
+                        ->getOptionLabelUsing(function (int|string $value): string {
+                            $player = Player::where('id', $value)->first();
+
+                            return $player !== null ? $player->full_name : '—';
+                        })
                         ->searchable()
                         ->required(),
 
@@ -118,7 +122,8 @@ class OrderResource extends Resource
                             if (! $state['product_id']) {
                                 return null;
                             }
-                            $product = Product::find($state['product_id']);
+                            $productId = $state['product_id'] ?? null;
+                            $product = $productId !== null ? Product::find((int) $productId) : null;
                             $qty     = $state['quantity'] ?? 1;
                             $price   = $state['unit_price'] ?? 0;
                             $sub     = number_format((float) $price * (int) $qty, 2, ',', ' ');
@@ -139,7 +144,11 @@ class OrderResource extends Resource
                 ->schema([
                     TextEntry::make('player.full_name')
                         ->label('Joueur')
-                        ->getStateUsing(fn (Order $record) => $record->player?->full_name ?? '(joueur supprimé)'),
+                        ->getStateUsing(function (Order $record): string {
+                            $player = $record->player;
+
+                            return $player !== null ? $player->full_name : '(joueur supprimé)';
+                        }),
                     TextEntry::make('status')
                         ->label('Statut')
                         ->badge()
@@ -198,7 +207,9 @@ class OrderResource extends Resource
                     ->label('Articles')
                     ->getStateUsing(function (Order $record): string {
                         return $record->items->map(function ($item) {
-                            $name = $item->product?->name ?? '(produit supprimé)';
+                            $product = $item->product;
+                            $name = $product !== null ? $product->name : '(produit supprimé)';
+
                             return "{$name} ×{$item->quantity}";
                         })->join(', ');
                     })

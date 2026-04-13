@@ -66,7 +66,11 @@ class ListSeasons extends ListRecords
                         ->displayFormat('d/m/Y'),
                 ])
                 ->action(function (array $data): void {
-                    $season = app(SeasonService::class)->createAndActivate($data);
+                    $season = app(SeasonService::class)->createAndActivate([
+                        'name'       => (string) ($data['name'] ?? ''),
+                        'start_date' => (string) ($data['start_date'] ?? ''),
+                        'end_date'   => (string) ($data['end_date'] ?? ''),
+                    ]);
 
                     if (! $season) {
                         Notification::make()

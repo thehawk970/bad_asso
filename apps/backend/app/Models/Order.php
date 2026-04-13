@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Override;
 
 /**
+ * @property OrderStatus $status
  * @property-read float $amount_paid
  * @property-read float $remaining_amount
  */
@@ -76,14 +77,20 @@ class Order extends Model
 
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
-    /** @param Builder<Order> $query */
-    public function scopePending(Builder $query): Builder<Order>
+    /**
+     * @param Builder<Order> $query
+     * @return Builder<Order>
+     */
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', OrderStatus::Pending);
     }
 
-    /** @param Builder<Order> $query */
-    public function scopePaid(Builder $query): Builder<Order>
+    /**
+     * @param Builder<Order> $query
+     * @return Builder<Order>
+     */
+    public function scopePaid(Builder $query): Builder
     {
         return $query->where('status', OrderStatus::Paid);
     }

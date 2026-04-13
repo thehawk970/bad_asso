@@ -29,8 +29,11 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    /** @param Builder<Product> $query */
-    public function scopeActive(Builder $query): Builder<Product>
+    /**
+     * @param Builder<Product> $query
+     * @return Builder<Product>
+     */
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
     }

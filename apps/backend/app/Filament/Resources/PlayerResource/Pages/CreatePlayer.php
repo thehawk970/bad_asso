@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\PlayerResource\Pages;
 
 use App\Filament\Resources\PlayerResource;
+use App\Models\Player;
 use App\Models\Season;
 use App\Services\LicenseService;
 use Filament\Notifications\Notification;
@@ -28,7 +29,9 @@ class CreatePlayer extends CreateRecord
             return;
         }
 
-        app(LicenseService::class)->createPendingForPlayer($this->record, $season);
+        /** @var Player $player */
+        $player = $this->record;
+        app(LicenseService::class)->createPendingForPlayer($player, $season);
 
         Notification::make()
             ->title("Licence {$season->name} créée automatiquement")

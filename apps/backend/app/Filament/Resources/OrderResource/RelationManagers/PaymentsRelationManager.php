@@ -6,6 +6,7 @@ namespace App\Filament\Resources\OrderResource\RelationManagers;
 
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Models\Order;
 use App\Models\Payment;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -33,7 +34,12 @@ class PaymentsRelationManager extends RelationManager
                 ->step(0.01)
                 ->suffix('€')
                 ->required()
-                ->default(fn () => $this->getOwnerRecord()->remaining_amount ?: null),
+                ->default(function (): ?float {
+                    /** @var Order $order */
+                    $order = $this->getOwnerRecord();
+
+                    return $order->remaining_amount ?: null;
+                }),
 
             Select::make('method')
                 ->label('Méthode')
@@ -89,7 +95,10 @@ class PaymentsRelationManager extends RelationManager
                 CreateAction::make()
                     ->label('Ajouter un paiement')
                     ->mutateDataUsing(function (array $data): array {
-                        $data['player_id'] = $this->getOwnerRecord()->player_id;
+                        /** @var Order $owner */
+                        $owner = $this->getOwnerRecord();
+                        $data['player_id'] = $owner->player_id;
+
                         return $data;
                     }),
             ])

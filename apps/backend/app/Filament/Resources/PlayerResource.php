@@ -7,6 +7,8 @@ namespace App\Filament\Resources;
 use App\Enums\LicenseStatus;
 use App\Enums\PaymentStatus;
 use App\Filament\Resources\PlayerResource\Pages;
+use App\Models\License;
+use App\Models\Payment;
 use App\Models\Player;
 use App\Models\Season;
 use Filament\Actions\Action;
@@ -149,13 +151,19 @@ class PlayerResource extends Resource
                     ->badge()
                     ->getStateUsing(function (Player $record): string {
                         $latest = $record->licenses()->latest()->first();
+                        if (! $latest instanceof License) {
+                            return 'Aucune';
+                        }
 
-                        return $latest ? $latest->status->label() : 'Aucune';
+                        return $latest->status->label();
                     })
                     ->color(function (Player $record): string {
                         $latest = $record->licenses()->latest()->first();
+                        if (! $latest instanceof License) {
+                            return 'gray';
+                        }
 
-                        return $latest ? $latest->status->color() : 'gray';
+                        return $latest->status->color();
                     }),
 
                 TextColumn::make('payment_status')
@@ -163,13 +171,19 @@ class PlayerResource extends Resource
                     ->badge()
                     ->getStateUsing(function (Player $record): string {
                         $latest = $record->payments()->latest()->first();
+                        if (! $latest instanceof Payment) {
+                            return 'Aucun';
+                        }
 
-                        return $latest ? $latest->status->label() : 'Aucun';
+                        return $latest->status->label();
                     })
                     ->color(function (Player $record): string {
                         $latest = $record->payments()->latest()->first();
+                        if (! $latest instanceof Payment) {
+                            return 'gray';
+                        }
 
-                        return $latest ? $latest->status->color() : 'gray';
+                        return $latest->status->color();
                     }),
 
                 TextColumn::make('created_at')

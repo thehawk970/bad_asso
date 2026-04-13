@@ -72,30 +72,42 @@ class Player extends Model
 
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
-    /** @param Builder<Player> $query */
-    public function scopeWithPendingPayments(Builder $query): Builder<Player>
+    /**
+     * @param Builder<Player> $query
+     * @return Builder<Player>
+     */
+    public function scopeWithPendingPayments(Builder $query): Builder
     {
         return $query->whereHas('payments', function (Builder $q) {
             $q->where('status', PaymentStatus::Pending->value);
         });
     }
 
-    /** @param Builder<Player> $query */
-    public function scopeWithoutValidatedLicense(Builder $query): Builder<Player>
+    /**
+     * @param Builder<Player> $query
+     * @return Builder<Player>
+     */
+    public function scopeWithoutValidatedLicense(Builder $query): Builder
     {
         return $query->whereDoesntHave('licenses', function (Builder $q) {
             $q->where('status', LicenseStatus::Validated->value);
         });
     }
 
-    /** @param Builder<Player> $query */
-    public function scopeWithoutAnyLicense(Builder $query): Builder<Player>
+    /**
+     * @param Builder<Player> $query
+     * @return Builder<Player>
+     */
+    public function scopeWithoutAnyLicense(Builder $query): Builder
     {
         return $query->whereDoesntHave('licenses');
     }
 
-    /** @param Builder<Player> $query */
-    public function scopeSearch(Builder $query, string $search): Builder<Player>
+    /**
+     * @param Builder<Player> $query
+     * @return Builder<Player>
+     */
+    public function scopeSearch(Builder $query, string $search): Builder
     {
         return $query->where(function (Builder $q) use ($search) {
             $q->where('first_name', 'ilike', "%{$search}%")

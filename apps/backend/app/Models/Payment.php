@@ -13,6 +13,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
 
+/**
+ * @property PaymentStatus $status
+ * @property PaymentMethod|null $method
+ */
 #[ObservedBy(PaymentObserver::class)]
 class Payment extends Model
 {
@@ -44,14 +48,20 @@ class Payment extends Model
 
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
-    /** @param Builder<Payment> $query */
-    public function scopeValidated(Builder $query): Builder<Payment>
+    /**
+     * @param Builder<Payment> $query
+     * @return Builder<Payment>
+     */
+    public function scopeValidated(Builder $query): Builder
     {
         return $query->where('status', PaymentStatus::Validated);
     }
 
-    /** @param Builder<Payment> $query */
-    public function scopePending(Builder $query): Builder<Payment>
+    /**
+     * @param Builder<Payment> $query
+     * @return Builder<Payment>
+     */
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', PaymentStatus::Pending);
     }

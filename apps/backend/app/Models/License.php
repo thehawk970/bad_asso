@@ -10,6 +10,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Override;
 
+/**
+ * @property LicenseStatus $status
+ * @property bool $payment_confirmed
+ * @property bool $health_form_filled
+ * @property bool $info_form_filled
+ * @property bool $rules_signed
+ */
 class License extends Model
 {
     protected $fillable = [
@@ -92,20 +99,29 @@ class License extends Model
 
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
-    /** @param Builder<License> $query */
-    public function scopeValidated(Builder $query): Builder<License>
+    /**
+     * @param Builder<License> $query
+     * @return Builder<License>
+     */
+    public function scopeValidated(Builder $query): Builder
     {
         return $query->where('status', LicenseStatus::Validated);
     }
 
-    /** @param Builder<License> $query */
-    public function scopePending(Builder $query): Builder<License>
+    /**
+     * @param Builder<License> $query
+     * @return Builder<License>
+     */
+    public function scopePending(Builder $query): Builder
     {
         return $query->where('status', LicenseStatus::Pending);
     }
 
-    /** @param Builder<License> $query */
-    public function scopeForSeason(Builder $query, Season $season): Builder<License>
+    /**
+     * @param Builder<License> $query
+     * @return Builder<License>
+     */
+    public function scopeForSeason(Builder $query, Season $season): Builder
     {
         return $query->where('season_id', $season->id);
     }
