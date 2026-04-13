@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[ObservedBy(OrderObserver::class)]
 class Order extends Model
 {
-    protected $fillable = ['player_id', 'status', 'total', 'reference', 'paid_at'];
+    protected $fillable = ['player_id', 'status', 'total', 'reference', 'paid_at', 'is_picked_up'];
 
     #[\Override]
     protected function casts(): array
