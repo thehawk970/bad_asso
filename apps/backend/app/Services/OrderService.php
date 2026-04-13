@@ -26,8 +26,8 @@ class OrderService
         $order->items()->with('product')->get()->each(function (OrderItem $item) use ($order): void {
             $order->payments()->create([
                 'player_id' => $order->player_id,
-                'amount'    => $item->unit_price * $item->quantity,
-                'status'    => PaymentStatus::Pending,
+                'amount' => $item->unit_price * $item->quantity,
+                'status' => PaymentStatus::Pending,
                 'reference' => $item->product?->name,
             ]);
         });
@@ -59,7 +59,7 @@ class OrderService
             ]);
 
         $order->update([
-            'status'  => OrderStatus::Paid,
+            'status' => OrderStatus::Paid,
             'paid_at' => now(),
         ]);
     }
@@ -69,7 +69,7 @@ class OrderService
      * Si oui, marque la commande comme payée.
      * L'OrderObserver se charge ensuite de la licence.
      *
-     * @return bool  true si la commande vient d'être marquée payée
+     * @return bool true si la commande vient d'être marquée payée
      */
     public function checkIfFullyPaid(Order $order): bool
     {
@@ -86,7 +86,7 @@ class OrderService
         }
 
         $order->update([
-            'status'  => OrderStatus::Paid,
+            'status' => OrderStatus::Paid,
             'paid_at' => now(),
         ]);
 

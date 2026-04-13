@@ -125,9 +125,9 @@ class SeasonResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListSeasons::route('/'),
+            'index' => Pages\ListSeasons::route('/'),
             'create' => Pages\CreateSeason::route('/create'),
-            'edit'   => Pages\EditSeason::route('/{record}/edit'),
+            'edit' => Pages\EditSeason::route('/{record}/edit'),
         ];
     }
 }

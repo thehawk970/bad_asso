@@ -73,7 +73,7 @@ class Player extends Model
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
     /**
-     * @param Builder<Player> $query
+     * @param  Builder<Player>  $query
      * @return Builder<Player>
      */
     public function scopeWithPendingPayments(Builder $query): Builder
@@ -84,7 +84,7 @@ class Player extends Model
     }
 
     /**
-     * @param Builder<Player> $query
+     * @param  Builder<Player>  $query
      * @return Builder<Player>
      */
     public function scopeWithoutValidatedLicense(Builder $query): Builder
@@ -95,7 +95,7 @@ class Player extends Model
     }
 
     /**
-     * @param Builder<Player> $query
+     * @param  Builder<Player>  $query
      * @return Builder<Player>
      */
     public function scopeWithoutAnyLicense(Builder $query): Builder
@@ -104,15 +104,15 @@ class Player extends Model
     }
 
     /**
-     * @param Builder<Player> $query
+     * @param  Builder<Player>  $query
      * @return Builder<Player>
      */
     public function scopeSearch(Builder $query, string $search): Builder
     {
         return $query->where(function (Builder $q) use ($search) {
             $q->where('first_name', 'ilike', "%{$search}%")
-              ->orWhere('last_name', 'ilike', "%{$search}%")
-              ->orWhere('email', 'ilike', "%{$search}%");
+                ->orWhere('last_name', 'ilike', "%{$search}%")
+                ->orWhere('email', 'ilike', "%{$search}%");
         });
     }
 }

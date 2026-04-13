@@ -42,8 +42,8 @@ class LicenseService
 
         if (! $exists) {
             $player->licenses()->create([
-                'season_id'         => $currentSeason?->id,
-                'status'            => LicenseStatus::Pending,
+                'season_id' => $currentSeason?->id,
+                'status' => LicenseStatus::Pending,
                 'payment_confirmed' => false,
             ]);
         }
@@ -53,7 +53,7 @@ class LicenseService
      * Confirme le paiement sur la licence du joueur et tente de la valider.
      * Appelé lorsque la commande passe en statut "payée".
      *
-     * @return bool  true si la licence vient d'être validée
+     * @return bool true si la licence vient d'être validée
      */
     public function confirmPaymentForOrder(Order $order): bool
     {
@@ -80,14 +80,14 @@ class LicenseService
 
         if (! $license) {
             $license = $player->licenses()->create([
-                'season_id'         => $currentSeason?->id,
-                'status'            => LicenseStatus::InProgress,
+                'season_id' => $currentSeason?->id,
+                'status' => LicenseStatus::InProgress,
                 'payment_confirmed' => true,
             ]);
         } else {
             $license->update([
                 'payment_confirmed' => true,
-                'status'            => LicenseStatus::InProgress,
+                'status' => LicenseStatus::InProgress,
             ]);
         }
 
@@ -101,7 +101,7 @@ class LicenseService
     {
         return $player->licenses()->create([
             'season_id' => $season->id,
-            'status'    => LicenseStatus::Pending,
+            'status' => LicenseStatus::Pending,
         ]);
     }
 
@@ -122,7 +122,7 @@ class LicenseService
      * Met à jour les conditions d'une licence et tente de la valider.
      *
      * @param  array{payment_confirmed?: bool, health_form_filled?: bool, info_form_filled?: bool, rules_signed?: bool}  $conditions
-     * @return bool  true si la licence vient d'être validée
+     * @return bool true si la licence vient d'être validée
      */
     public function updateConditionsAndValidate(License $license, array $conditions): bool
     {

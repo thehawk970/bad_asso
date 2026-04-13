@@ -22,10 +22,10 @@ class SeasonService
         }
 
         $season = Season::create([
-            'name'       => $data['name'],
+            'name' => $data['name'],
             'start_date' => $data['start_date'],
-            'end_date'   => $data['end_date'],
-            'is_active'  => false,
+            'end_date' => $data['end_date'],
+            'is_active' => false,
         ]);
 
         $season->activate();

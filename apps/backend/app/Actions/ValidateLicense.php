@@ -18,7 +18,7 @@ class ValidateLicense
 
         if (! empty($missing)) {
             throw new \RuntimeException(
-                'Impossible de valider la licence. Conditions manquantes : ' . implode(', ', $missing)
+                'Impossible de valider la licence. Conditions manquantes : '.implode(', ', $missing)
             );
         }
 

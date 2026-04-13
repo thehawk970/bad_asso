@@ -7,26 +7,26 @@ namespace App\Filament\Resources;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Filament\Resources\OrderResource\Pages;
-use App\Services\OrderService;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
+use App\Models\Player;
 use App\Models\Product;
+use App\Services\OrderService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use App\Models\Player;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -62,7 +62,7 @@ class OrderResource extends Resource
                             ->orderBy('last_name')
                             ->limit(50)
                             ->get()
-                            ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name . ' ' . $p->first_name])
+                            ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name.' '.$p->first_name])
                         )
                         ->getOptionLabelUsing(function (int|string $value): string {
                             $player = Player::where('id', $value)->first();
@@ -124,9 +124,9 @@ class OrderResource extends Resource
                             }
                             $productId = $state['product_id'] ?? null;
                             $product = $productId !== null ? Product::find((int) $productId) : null;
-                            $qty     = $state['quantity'] ?? 1;
-                            $price   = $state['unit_price'] ?? 0;
-                            $sub     = number_format((float) $price * (int) $qty, 2, ',', ' ');
+                            $qty = $state['quantity'] ?? 1;
+                            $price = $state['unit_price'] ?? 0;
+                            $sub = number_format((float) $price * (int) $qty, 2, ',', ' ');
 
                             return "{$product?->name} × {$qty} = {$sub} €";
                         }),
@@ -185,7 +185,7 @@ class OrderResource extends Resource
 
     // ─── Table ───────────────────────────────────────────────────────────────────
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with(['player', 'items.product']);
     }
@@ -199,7 +199,7 @@ class OrderResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->formatStateUsing(fn ($state, Order $record) => $record->player
-                        ? $record->player->last_name . ' ' . $record->player->first_name
+                        ? $record->player->last_name.' '.$record->player->first_name
                         : '(joueur supprimé)'
                     ),
 
@@ -297,10 +297,10 @@ class OrderResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListOrders::route('/'),
+            'index' => Pages\ListOrders::route('/'),
             'create' => Pages\CreateOrder::route('/create'),
-            'view'   => Pages\ViewOrder::route('/{record}'),
-            'edit'   => Pages\EditOrder::route('/{record}/edit'),
+            'view' => Pages\ViewOrder::route('/{record}'),
+            'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
     }
 }

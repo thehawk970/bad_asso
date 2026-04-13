@@ -8,7 +8,6 @@ use App\Enums\LicenseStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Override;
 
 /**
  * @property LicenseStatus $status
@@ -29,15 +28,15 @@ class License extends Model
         'rules_signed',
     ];
 
-    #[Override]
+    #[\Override]
     protected function casts(): array
     {
         return [
-            'status'             => LicenseStatus::class,
-            'payment_confirmed'  => 'boolean',
+            'status' => LicenseStatus::class,
+            'payment_confirmed' => 'boolean',
             'health_form_filled' => 'boolean',
-            'info_form_filled'   => 'boolean',
-            'rules_signed'       => 'boolean',
+            'info_form_filled' => 'boolean',
+            'rules_signed' => 'boolean',
         ];
     }
 
@@ -67,10 +66,18 @@ class License extends Model
     {
         $missing = [];
 
-        if (! $this->payment_confirmed)  $missing[] = 'Paiement non confirmé';
-        if (! $this->health_form_filled) $missing[] = 'Formulaire de santé non rempli';
-        if (! $this->info_form_filled)   $missing[] = 'Formulaire de renseignements non rempli';
-        if (! $this->rules_signed)       $missing[] = 'Règlement Poona non signé';
+        if (! $this->payment_confirmed) {
+            $missing[] = 'Paiement non confirmé';
+        }
+        if (! $this->health_form_filled) {
+            $missing[] = 'Formulaire de santé non rempli';
+        }
+        if (! $this->info_form_filled) {
+            $missing[] = 'Formulaire de renseignements non rempli';
+        }
+        if (! $this->rules_signed) {
+            $missing[] = 'Règlement Poona non signé';
+        }
 
         return $missing;
     }
@@ -100,7 +107,7 @@ class License extends Model
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
     /**
-     * @param Builder<License> $query
+     * @param  Builder<License>  $query
      * @return Builder<License>
      */
     public function scopeValidated(Builder $query): Builder
@@ -109,7 +116,7 @@ class License extends Model
     }
 
     /**
-     * @param Builder<License> $query
+     * @param  Builder<License>  $query
      * @return Builder<License>
      */
     public function scopePending(Builder $query): Builder
@@ -118,7 +125,7 @@ class License extends Model
     }
 
     /**
-     * @param Builder<License> $query
+     * @param  Builder<License>  $query
      * @return Builder<License>
      */
     public function scopeForSeason(Builder $query, Season $season): Builder

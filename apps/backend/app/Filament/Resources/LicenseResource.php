@@ -9,6 +9,7 @@ use App\Filament\Resources\LicenseResource\Pages;
 use App\Models\License;
 use App\Models\Player;
 use App\Models\Season;
+use App\Services\LicenseService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -48,7 +49,7 @@ class LicenseResource extends Resource
                     ->orderBy('last_name')
                     ->limit(50)
                     ->get()
-                    ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name . ' ' . $p->first_name])
+                    ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name.' '.$p->first_name])
                 )
                 ->getOptionLabelUsing(function (int|string $value): string {
                     $player = Player::where('id', $value)->first();
@@ -196,7 +197,7 @@ class LicenseResource extends Resource
                             ->default($record->rules_signed),
                     ])
                     ->action(function (License $record, array $data): void {
-                        $validated = app(\App\Services\LicenseService::class)
+                        $validated = app(LicenseService::class)
                             ->updateConditionsAndValidate($record, $data);
 
                         if ($validated) {
@@ -214,7 +215,7 @@ class LicenseResource extends Resource
                             ->title('Conditions mises à jour')
                             ->body(empty($missing)
                                 ? 'Toutes les conditions sont remplies.'
-                                : 'Conditions restantes : ' . implode(' · ', $missing)
+                                : 'Conditions restantes : '.implode(' · ', $missing)
                             )
                             ->info()
                             ->send();
@@ -234,9 +235,9 @@ class LicenseResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListLicenses::route('/'),
+            'index' => Pages\ListLicenses::route('/'),
             'create' => Pages\CreateLicense::route('/create'),
-            'edit'   => Pages\EditLicense::route('/{record}/edit'),
+            'edit' => Pages\EditLicense::route('/{record}/edit'),
         ];
     }
 }

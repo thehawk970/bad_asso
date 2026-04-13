@@ -16,8 +16,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
-use Filament\Notifications\Notification;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -48,7 +48,7 @@ class PaymentResource extends Resource
                     ->orderBy('last_name')
                     ->limit(50)
                     ->get()
-                    ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name . ' ' . $p->first_name])
+                    ->mapWithKeys(fn (Player $p) => [$p->id => $p->last_name.' '.$p->first_name])
                 )
                 ->getOptionLabelUsing(function (int|string $value): string {
                     $player = Player::where('id', $value)->first();
@@ -96,7 +96,7 @@ class PaymentResource extends Resource
                     ->formatStateUsing(function ($state, Payment $record): string {
                         $player = $record->player;
 
-                        return $player !== null ? $player->last_name . ' ' . $player->first_name : '—';
+                        return $player !== null ? $player->last_name.' '.$player->first_name : '—';
                     }),
 
                 TextColumn::make('amount')
@@ -180,9 +180,9 @@ class PaymentResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListPayments::route('/'),
+            'index' => Pages\ListPayments::route('/'),
             'create' => Pages\CreatePayment::route('/create'),
-            'edit'   => Pages\EditPayment::route('/{record}/edit'),
+            'edit' => Pages\EditPayment::route('/{record}/edit'),
         ];
     }
 }

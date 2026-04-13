@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Override;
 
 /**
  * @property OrderStatus $status
@@ -25,12 +24,12 @@ class Order extends Model
 {
     protected $fillable = ['player_id', 'status', 'total', 'reference', 'paid_at'];
 
-    #[Override]
+    #[\Override]
     protected function casts(): array
     {
         return [
-            'status'  => OrderStatus::class,
-            'total'   => 'decimal:2',
+            'status' => OrderStatus::class,
+            'total' => 'decimal:2',
             'paid_at' => 'datetime',
         ];
     }
@@ -78,7 +77,7 @@ class Order extends Model
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
     /**
-     * @param Builder<Order> $query
+     * @param  Builder<Order>  $query
      * @return Builder<Order>
      */
     public function scopePending(Builder $query): Builder
@@ -87,7 +86,7 @@ class Order extends Model
     }
 
     /**
-     * @param Builder<Order> $query
+     * @param  Builder<Order>  $query
      * @return Builder<Order>
      */
     public function scopePaid(Builder $query): Builder

@@ -11,6 +11,7 @@ use App\Models\License;
 use App\Models\Payment;
 use App\Models\Player;
 use App\Models\Season;
+use App\Services\LicenseService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -135,7 +136,7 @@ class PlayerResource extends Resource
                     ->label('Joueur')
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(['last_name'])
-                    ->getStateUsing(fn (Player $record) => $record->last_name . ' ' . $record->first_name),
+                    ->getStateUsing(fn (Player $record) => $record->last_name.' '.$record->first_name),
 
                 TextColumn::make('email')
                     ->label('Email')
@@ -196,6 +197,7 @@ class PlayerResource extends Resource
                 Filter::make('without_current_season_license')
                     ->label(function (): string {
                         $season = Season::current();
+
                         return $season ? "Sans licence {$season->name}" : 'Sans licence saison active';
                     })
                     ->query(function (Builder $q): Builder {
@@ -203,6 +205,7 @@ class PlayerResource extends Resource
                         if (! $season) {
                             return $q;
                         }
+
                         return $q->whereDoesntHave('licenses', function (Builder $sub) use ($season) {
                             $sub->where('season_id', $season->id);
                         });
@@ -217,7 +220,7 @@ class PlayerResource extends Resource
                 Filter::make('no_validated_license')
                     ->label('Licence non validée')
                     ->query(fn (Builder $q) => $q->whereDoesntHave('licenses', function (Builder $sub) {
-                            $sub->where('status', LicenseStatus::Validated->value);
+                        $sub->where('status', LicenseStatus::Validated->value);
                     })),
             ])
             ->recordActions([
@@ -242,16 +245,18 @@ class PlayerResource extends Resource
 
                         if (! $season) {
                             Notification::make()->title('Aucune saison active')->warning()->send();
+
                             return;
                         }
 
-                        $license = app(\App\Services\LicenseService::class)->renewForPlayer($record, $season);
+                        $license = app(LicenseService::class)->renewForPlayer($record, $season);
 
                         if (! $license) {
                             Notification::make()
                                 ->title("Licence {$season->name} déjà existante pour ce joueur")
                                 ->warning()
                                 ->send();
+
                             return;
                         }
 
@@ -272,10 +277,10 @@ class PlayerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => Pages\ListPlayers::route('/'),
+            'index' => Pages\ListPlayers::route('/'),
             'create' => Pages\CreatePlayer::route('/create'),
-            'view'   => Pages\ViewPlayer::route('/{record}'),
-            'edit'   => Pages\EditPlayer::route('/{record}/edit'),
+            'view' => Pages\ViewPlayer::route('/{record}'),
+            'edit' => Pages\EditPlayer::route('/{record}/edit'),
         ];
     }
 }

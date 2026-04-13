@@ -48,7 +48,7 @@ class BadManagerOverview extends StatsOverviewWidget
 
         return [
             Stat::make('Licences non validées', $pendingLicenses)
-                ->description($seasonLabel . ' — en attente ou en cours')
+                ->description($seasonLabel.' — en attente ou en cours')
                 ->descriptionIcon('heroicon-m-exclamation-circle')
                 ->color('danger'),
 
@@ -57,7 +57,7 @@ class BadManagerOverview extends StatsOverviewWidget
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('warning'),
 
-            Stat::make('Sans licence ' . ($currentSeason !== null ? $currentSeason->name : '—'), $playersWithoutCurrentLicense)
+            Stat::make('Sans licence '.($currentSeason !== null ? $currentSeason->name : '—'), $playersWithoutCurrentLicense)
                 ->description('Joueurs non encore renouvelés')
                 ->descriptionIcon('heroicon-m-user-minus')
                 ->color($playersWithoutCurrentLicense > 0 ? 'danger' : 'success'),

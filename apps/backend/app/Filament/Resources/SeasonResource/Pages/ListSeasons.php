@@ -8,8 +8,8 @@ use App\Filament\Resources\SeasonResource;
 use App\Models\Season;
 use App\Services\SeasonService;
 use Carbon\Carbon;
-use Filament\Actions\CreateAction;
 use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -32,21 +32,21 @@ class ListSeasons extends ListRecords
                     if ($current) {
                         // Calcul automatique : +1 an
                         $nextStart = Carbon::parse($current->end_date)->addDay(); // 01/09
-                        $nextEnd   = $nextStart->copy()->addYear()->subDay();     // 31/08
+                        $nextEnd = $nextStart->copy()->addYear()->subDay();     // 31/08
 
                         // Nom : "25-26" -> "26-27"
                         [$y1, $y2] = explode('-', $current->name);
-                        $nextName  = ((int) $y2) . '-' . ((int) $y2 + 1);
+                        $nextName = ((int) $y2).'-'.((int) $y2 + 1);
                     } else {
                         $nextStart = Carbon::createFromDate(null, 9, 1);
-                        $nextEnd   = $nextStart->copy()->addYear()->subDay();
-                        $nextName  = $nextStart->format('y') . '-' . $nextEnd->format('y');
+                        $nextEnd = $nextStart->copy()->addYear()->subDay();
+                        $nextName = $nextStart->format('y').'-'.$nextEnd->format('y');
                     }
 
                     return [
-                        'name'       => $nextName,
+                        'name' => $nextName,
                         'start_date' => $nextStart->toDateString(),
-                        'end_date'   => $nextEnd->toDateString(),
+                        'end_date' => $nextEnd->toDateString(),
                     ];
                 })
                 ->schema([
@@ -67,9 +67,9 @@ class ListSeasons extends ListRecords
                 ])
                 ->action(function (array $data): void {
                     $season = app(SeasonService::class)->createAndActivate([
-                        'name'       => (string) ($data['name'] ?? ''),
+                        'name' => (string) ($data['name'] ?? ''),
                         'start_date' => (string) ($data['start_date'] ?? ''),
-                        'end_date'   => (string) ($data['end_date'] ?? ''),
+                        'end_date' => (string) ($data['end_date'] ?? ''),
                     ]);
 
                     if (! $season) {

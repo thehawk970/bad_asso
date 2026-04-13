@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Override;
 
 /**
  * @property PaymentStatus $status
@@ -22,7 +21,7 @@ class Payment extends Model
 {
     protected $fillable = ['player_id', 'order_id', 'amount', 'method', 'status', 'reference'];
 
-    #[Override]
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -49,7 +48,7 @@ class Payment extends Model
     // ─── Scopes ─────────────────────────────────────────────────────────────────
 
     /**
-     * @param Builder<Payment> $query
+     * @param  Builder<Payment>  $query
      * @return Builder<Payment>
      */
     public function scopeValidated(Builder $query): Builder
@@ -58,7 +57,7 @@ class Payment extends Model
     }
 
     /**
-     * @param Builder<Payment> $query
+     * @param  Builder<Payment>  $query
      * @return Builder<Payment>
      */
     public function scopePending(Builder $query): Builder

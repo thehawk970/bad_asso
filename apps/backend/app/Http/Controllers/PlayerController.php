@@ -24,16 +24,16 @@ class PlayerController extends Controller
             ->orderBy('last_name')
             ->get()
             ->map(fn (Player $player) => [
-                'id'                => $player->id,
-                'full_name'         => $player->full_name,
-                'first_name'        => $player->first_name,
-                'last_name'         => $player->last_name,
-                'email'             => $player->email,
-                'phone'             => $player->phone,
+                'id' => $player->id,
+                'full_name' => $player->full_name,
+                'first_name' => $player->first_name,
+                'last_name' => $player->last_name,
+                'email' => $player->email,
+                'phone' => $player->phone,
                 'has_valid_license' => $player->has_valid_license,
                 'has_valid_payment' => $player->has_valid_payment,
-                'latest_license'    => $player->licenses->first()?->only(['status', 'season']),
-                'latest_payment'    => $player->payments->first()?->only(['status', 'amount']),
+                'latest_license' => $player->licenses->first()?->only(['status', 'season']),
+                'latest_payment' => $player->payments->first()?->only(['status', 'amount']),
             ]);
 
         return Inertia::render('players/index', compact('players'));
@@ -45,34 +45,34 @@ class PlayerController extends Controller
 
         return Inertia::render('players/show', [
             'player' => [
-                'id'                => $player->id,
-                'full_name'         => $player->full_name,
-                'first_name'        => $player->first_name,
-                'last_name'         => $player->last_name,
-                'email'             => $player->email,
-                'phone'             => $player->phone,
+                'id' => $player->id,
+                'full_name' => $player->full_name,
+                'first_name' => $player->first_name,
+                'last_name' => $player->last_name,
+                'email' => $player->email,
+                'phone' => $player->phone,
                 'has_valid_license' => $player->has_valid_license,
                 'has_valid_payment' => $player->has_valid_payment,
-                'created_at'        => $player->created_at?->format('d/m/Y') ?? '',
+                'created_at' => $player->created_at?->format('d/m/Y') ?? '',
             ],
             'licenses' => $player->licenses->map(fn (License $l) => [
-                'id'           => $l->id,
-                'season_name'  => $l->season?->name,
-                'status'       => $l->status->value,
+                'id' => $l->id,
+                'season_name' => $l->season?->name,
+                'status' => $l->status->value,
                 'status_label' => $l->status->label(),
                 'status_color' => $l->status->color(),
-                'created_at'   => $l->created_at?->format('d/m/Y') ?? '',
+                'created_at' => $l->created_at?->format('d/m/Y') ?? '',
             ]),
             'payments' => $player->payments->map(fn (Payment $p) => [
-                'id'           => $p->id,
-                'amount'       => $p->amount,
-                'method'       => $p->method?->value,
+                'id' => $p->id,
+                'amount' => $p->amount,
+                'method' => $p->method?->value,
                 'method_label' => $p->method?->label(),
-                'status'       => $p->status->value,
+                'status' => $p->status->value,
                 'status_label' => $p->status->label(),
                 'status_color' => $p->status->color(),
-                'reference'    => $p->reference,
-                'created_at'   => $p->created_at?->format('d/m/Y') ?? '',
+                'reference' => $p->reference,
+                'created_at' => $p->created_at?->format('d/m/Y') ?? '',
             ]),
         ]);
     }

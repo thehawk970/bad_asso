@@ -16,3 +16,13 @@ parameters:
         - vendor
         - storage
         - bootstrap/cache
+
+    ignoreErrors:
+        # Limitations connues de l'intégration PHPStan / Pest-Plugin-Laravel
+        - identifier: method.notFound
+          path: tests
+        - identifier: missingType.return
+          path: tests
+        # auth()->user() nullable dans les tests — toujours authentifié via actingAs()
+        - identifier: method.nonObject
+          path: tests

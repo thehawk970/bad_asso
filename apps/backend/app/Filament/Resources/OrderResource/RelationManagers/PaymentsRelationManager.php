@@ -111,7 +111,7 @@ class PaymentsRelationManager extends RelationManager
 
                 /** @var Order $order */
                 $order = $this->getOwnerRecord();
-                $paid  = number_format($order->amount_paid, 2, ',', ' ');
+                $paid = number_format($order->amount_paid, 2, ',', ' ');
                 $total = number_format((float) $order->total, 2, ',', ' ');
                 $remaining = number_format($order->remaining_amount, 2, ',', ' ');
 
