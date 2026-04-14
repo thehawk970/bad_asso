@@ -6,7 +6,15 @@ FROM registry.thehawk970.space/montrees-club/montrees-php:latest AS builder
 USER root
 WORKDIR /var/www/html
 
-# Dépendances PHP d'abord (layer mis en cache tant que composer.lock ne change pas)
+# Node.js LTS — installé tôt pour profiter du cache Docker
+RUN apt-get update -qq \
+    && apt-get install -y --no-install-recommends curl ca-certificates \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && corepack enable \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Dépendances PHP (layer mis en cache tant que composer.lock ne change pas)
 COPY composer.json composer.lock ./
 RUN composer install \
     --no-dev \
@@ -22,7 +30,7 @@ RUN pnpm install --frozen-lockfile
 # Code source
 COPY . .
 
-# Autoload optimisé + build Vite (wayfinder peut appeler artisan depuis ici)
+# Autoload optimisé + build Vite (wayfinder appelle artisan depuis ici)
 RUN composer dump-autoload --no-dev --classmap-authoritative \
     && pnpm run build \
     && rm -rf node_modules
