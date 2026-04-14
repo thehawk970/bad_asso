@@ -20,11 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            backend:  [apps/backend/**]
+#      - uses: dorny/paths-filter@v3
+#        id: changes
+#        with:
+#          filters: |
+#            backend:  [apps/backend/**]
 
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
@@ -42,7 +42,6 @@ jobs:
           password: ${{ secrets.HARBOR_PASSWORD }}
 
       - name: Build backend
-        if: steps.changes.outputs.proxy == 'true'
         uses: docker/build-push-action@v6
         with:
           context: apps/backend
