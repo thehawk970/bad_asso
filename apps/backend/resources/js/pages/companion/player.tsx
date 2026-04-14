@@ -134,9 +134,9 @@ export default function CompanionPlayer({ player: initialPlayer, license: initia
         <>
             <Head title={data.player.full_name} />
 
-            <div className="flex h-screen flex-col">
+            <div className="flex flex-col">
                 {/* En-tête */}
-                <div className="bg-background border-b px-4 pb-4 pt-4">
+                <div className="bg-background sticky top-14 z-10 border-b px-4 pb-4 pt-4">
                     <div className="mb-3 flex items-center gap-2">
                         <Link
                             href="/companion/order"
@@ -165,7 +165,7 @@ export default function CompanionPlayer({ player: initialPlayer, license: initia
                 </div>
 
                 {/* Contenu */}
-                <div className="flex-1 space-y-5 overflow-y-auto p-4">
+                <div className="space-y-5 p-4">
                     {/* Infos */}
                     <div className="rounded-xl border p-4">
                         <h2 className="mb-3 text-sm font-semibold">Informations</h2>

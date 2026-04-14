@@ -36,7 +36,7 @@ async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<T> {
 export type CreateOrderPayload = {
     player_id: number;
     items: Array<{ product_id: number; quantity: number }>;
-    payment_method: string;
+    payment_method: string | null;
     is_picked_up: boolean;
 };
 

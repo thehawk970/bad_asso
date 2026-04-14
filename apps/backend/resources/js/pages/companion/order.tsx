@@ -1,13 +1,14 @@
-import { useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { useMutation } from '@tanstack/react-query';
 import { ArrowLeft, Check, Minus, Plus, ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { companionApi   } from '@/lib/companion-api';
+import type {CreateOrderPayload, CreatedOrder} from '@/lib/companion-api';
 import { cn } from '@/lib/utils';
-import { companionApi, type CreateOrderPayload, type CreatedOrder } from '@/lib/companion-api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -44,15 +45,30 @@ const fmt = (amount: number) =>
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
 
 function licenseVariant(status: CompanionPlayer['license_status']) {
-    if (status === 'validated') return 'default';
-    if (status === 'in_progress') return 'secondary';
+    if (status === 'validated') {
+return 'default';
+}
+
+    if (status === 'in_progress') {
+return 'secondary';
+}
+
     return 'outline';
 }
 
 function licenseLabel(status: CompanionPlayer['license_status']) {
-    if (status === 'validated') return 'Validée';
-    if (status === 'in_progress') return 'En cours';
-    if (status === 'pending') return 'En attente';
+    if (status === 'validated') {
+return 'Validée';
+}
+
+    if (status === 'in_progress') {
+return 'En cours';
+}
+
+    if (status === 'pending') {
+return 'En attente';
+}
+
     return 'Aucune';
 }
 
@@ -71,8 +87,8 @@ function PlayerStep({
     );
 
     return (
-        <div className="flex h-screen flex-col">
-            <div className="bg-background sticky top-0 z-10 border-b px-4 pb-3 pt-4">
+        <div className="flex min-h-[calc(100dvh-7.5rem)] flex-col">
+            <div className="bg-background sticky top-14 z-10 border-b px-4 pb-3 pt-4">
                 <p className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">
                     Étape 1 / 3
                 </p>
@@ -145,8 +161,8 @@ function ProductsStep({
     const totalPrice = [...cart.values()].reduce((s, i) => s + i.product.price * i.quantity, 0);
 
     return (
-        <div className="flex h-screen flex-col">
-            <div className="bg-background sticky top-0 z-10 border-b px-4 pb-3 pt-4">
+        <div className="flex min-h-[calc(100dvh-7.5rem)] flex-col">
+            <div className="bg-background sticky top-14 z-10 border-b px-4 pb-3 pt-4">
                 <div className="mb-2 flex items-center gap-2">
                     <button onClick={onBack} className="text-muted-foreground hover:text-foreground">
                         <ArrowLeft className="h-5 w-5" />
@@ -222,7 +238,7 @@ function ProductsStep({
             </div>
 
             {/* Barre de panier fixe */}
-            <div className="bg-background fixed bottom-0 left-0 right-0 border-t px-4 py-3 shadow-lg">
+            <div className="bg-background fixed bottom-16 left-0 right-0 border-t px-4 py-3 shadow-lg">
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                         <ShoppingCart className="text-muted-foreground h-5 w-5" />
@@ -260,7 +276,7 @@ function PaymentStep({
     cart: Map<number, CartItem>;
     paymentMethods: PaymentMethodOption[];
     onBack: () => void;
-    onConfirm: (method: string, isPickedUp: boolean) => void;
+    onConfirm: (method: string | null, isPickedUp: boolean) => void;
     isPending: boolean;
 }) {
     const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
@@ -270,8 +286,8 @@ function PaymentStep({
     const items = [...cart.values()];
 
     return (
-        <div className="flex h-screen flex-col">
-            <div className="bg-background sticky top-0 z-10 border-b px-4 pb-3 pt-4">
+        <div className="flex min-h-[calc(100dvh-7.5rem)] flex-col">
+            <div className="bg-background sticky top-14 z-10 border-b px-4 pb-3 pt-4">
                 <div className="mb-2 flex items-center gap-2">
                     <button onClick={onBack} className="text-muted-foreground hover:text-foreground">
                         <ArrowLeft className="h-5 w-5" />
@@ -307,7 +323,10 @@ function PaymentStep({
 
                 {/* Méthode de règlement */}
                 <div>
-                    <h2 className="mb-3 text-sm font-semibold">Méthode de règlement</h2>
+                    <h2 className="mb-3 text-sm font-semibold">
+                        Méthode de règlement
+                        <span className="text-muted-foreground ml-1 font-normal">(optionnel)</span>
+                    </h2>
                     <div className="grid grid-cols-2 gap-2">
                         {paymentMethods.map((method) => (
                             <button
@@ -349,10 +368,14 @@ function PaymentStep({
 
                 <Button
                     className="h-14 w-full text-base font-semibold"
-                    disabled={!selectedMethod || isPending}
-                    onClick={() => selectedMethod && onConfirm(selectedMethod, isPickedUp)}
+                    disabled={isPending}
+                    onClick={() => onConfirm(selectedMethod, isPickedUp)}
                 >
-                    {isPending ? 'Création en cours…' : 'Confirmer la commande'}
+                    {isPending
+                        ? 'Création en cours…'
+                        : selectedMethod
+                          ? 'Confirmer la commande'
+                          : 'Enregistrer sans paiement'}
                 </Button>
             </div>
         </div>
@@ -369,7 +392,7 @@ function SuccessStep({
     onNewOrder: () => void;
 }) {
     return (
-        <div className="flex h-screen flex-col items-center justify-center gap-6 p-6 text-center">
+        <div className="flex min-h-[calc(100dvh-7.5rem)] flex-col items-center justify-center gap-6 p-6 text-center">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/40">
                 <Check className="h-10 w-10 text-green-600" />
             </div>
@@ -428,6 +451,7 @@ export default function CompanionOrder({ players, products, paymentMethods }: Pr
             const next = new Map(prev);
             const current = next.get(product.id);
             next.set(product.id, { product, quantity: (current?.quantity ?? 0) + 1 });
+
             return next;
         });
     };
@@ -436,17 +460,21 @@ export default function CompanionOrder({ players, products, paymentMethods }: Pr
         setCart((prev) => {
             const next = new Map(prev);
             const current = next.get(productId);
+
             if (!current || current.quantity <= 1) {
                 next.delete(productId);
             } else {
                 next.set(productId, { ...current, quantity: current.quantity - 1 });
             }
+
             return next;
         });
     };
 
-    const handleConfirm = (paymentMethod: string, isPickedUp: boolean) => {
-        if (!selectedPlayer) return;
+    const handleConfirm = (paymentMethod: string | null, isPickedUp: boolean) => {
+        if (!selectedPlayer) {
+            return;
+        }
 
         createOrder({
             player_id: selectedPlayer.id,

@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -53,7 +54,7 @@ const colorToVariant = (
     return map[color] ?? 'outline';
 };
 
-const formatMoney = (amount: number) =>
+const fmt = (amount: number) =>
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
 
 export default function PlayersShow({ player, licenses, payments }: Props) {
@@ -65,140 +66,139 @@ export default function PlayersShow({ player, licenses, payments }: Props) {
         router.post(`/licenses/${licenseId}/validate`, {}, { preserveScroll: true });
     };
 
+    const initials = player.full_name
+        .split(' ')
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase();
+
     return (
         <>
             <Head title={player.full_name} />
 
-            <div className="space-y-8 p-6">
-                {/* Header */}
-                <div className="flex items-start justify-between">
-                    <div>
-                        <Button variant="ghost" size="sm" asChild className="mb-2 -ml-2">
-                            <Link href="/players">← Retour</Link>
-                        </Button>
-                        <h1 className="text-2xl font-bold">{player.full_name}</h1>
-                        <p className="text-muted-foreground text-sm">Inscrit le {player.created_at}</p>
+            {/* Header sticky */}
+            <div className="bg-background sticky top-14 z-10 border-b px-4 py-3">
+                <div className="flex items-center gap-3">
+                    <Link href="/players" className="text-muted-foreground hover:text-foreground">
+                        <ArrowLeft className="h-5 w-5" />
+                    </Link>
+                    <h1 className="truncate text-lg font-bold">{player.full_name}</h1>
+                </div>
+            </div>
+
+            <div className="space-y-4 p-4">
+                {/* Carte identité */}
+                <div className="flex items-center gap-4 rounded-xl border p-4">
+                    <div className="bg-primary text-primary-foreground flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold">
+                        {initials}
                     </div>
-                    <div className="flex gap-2">
-                        <Badge variant={player.has_valid_license ? 'default' : 'outline'}>
-                            {player.has_valid_license ? 'Licence OK' : 'Sans licence valide'}
-                        </Badge>
-                        <Badge variant={player.has_valid_payment ? 'default' : 'outline'}>
-                            {player.has_valid_payment ? 'Paiement OK' : 'Paiement en attente'}
-                        </Badge>
+                    <div className="min-w-0 flex-1">
+                        <p className="font-semibold">{player.full_name}</p>
+                        {player.email && (
+                            <p className="text-muted-foreground truncate text-sm">{player.email}</p>
+                        )}
+                        {player.phone && (
+                            <p className="text-muted-foreground text-sm">{player.phone}</p>
+                        )}
                     </div>
                 </div>
 
-                {/* Informations */}
-                <section className="rounded-lg border p-4">
-                    <h2 className="mb-4 text-base font-semibold">Informations</h2>
-                    <dl className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <dt className="text-muted-foreground">Email</dt>
-                            <dd>{player.email ?? '—'}</dd>
-                        </div>
-                        <div>
-                            <dt className="text-muted-foreground">Téléphone</dt>
-                            <dd>{player.phone ?? '—'}</dd>
-                        </div>
-                    </dl>
-                </section>
+                {/* Statuts rapides */}
+                <div className="grid grid-cols-2 gap-2">
+                    <div className={`rounded-xl border p-3 text-center ${player.has_valid_license ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : ''}`}>
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Licence</p>
+                        <p className={`mt-1 text-sm font-semibold ${player.has_valid_license ? 'text-green-600' : 'text-muted-foreground'}`}>
+                            {player.has_valid_license ? '✓ Validée' : 'En attente'}
+                        </p>
+                    </div>
+                    <div className={`rounded-xl border p-3 text-center ${player.has_valid_payment ? 'border-green-500 bg-green-50 dark:bg-green-950/20' : ''}`}>
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Paiement</p>
+                        <p className={`mt-1 text-sm font-semibold ${player.has_valid_payment ? 'text-green-600' : 'text-muted-foreground'}`}>
+                            {player.has_valid_payment ? '✓ Validé' : 'En attente'}
+                        </p>
+                    </div>
+                </div>
 
                 {/* Licences */}
-                <section className="rounded-lg border">
-                    <div className="border-b px-4 py-3">
-                        <h2 className="text-base font-semibold">Licences</h2>
+                {licenses.length > 0 && (
+                    <div>
+                        <h2 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                            Licences
+                        </h2>
+                        <div className="space-y-2">
+                            {licenses.map((license) => (
+                                <div
+                                    key={license.id}
+                                    className="flex items-center justify-between rounded-xl border p-4"
+                                >
+                                    <div>
+                                        <p className="font-medium">Saison {license.season}</p>
+                                        <p className="text-muted-foreground text-xs">{license.created_at}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant={colorToVariant(license.status_color)}>
+                                            {license.status_label}
+                                        </Badge>
+                                        {license.status !== 'validated' && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => handleValidateLicense(license.id)}
+                                            >
+                                                <Check className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    {licenses.length === 0 ? (
-                        <p className="text-muted-foreground px-4 py-6 text-sm">Aucune licence enregistrée.</p>
-                    ) : (
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b bg-muted/50">
-                                    <th className="px-4 py-2 text-left font-medium">Saison</th>
-                                    <th className="px-4 py-2 text-left font-medium">Statut</th>
-                                    <th className="px-4 py-2 text-left font-medium">Date</th>
-                                    <th className="px-4 py-2 text-left font-medium">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {licenses.map((license) => (
-                                    <tr key={license.id} className="border-b last:border-0">
-                                        <td className="px-4 py-3 font-medium">{license.season}</td>
-                                        <td className="px-4 py-3">
-                                            <Badge variant={colorToVariant(license.status_color)}>
-                                                {license.status_label}
-                                            </Badge>
-                                        </td>
-                                        <td className="text-muted-foreground px-4 py-3">{license.created_at}</td>
-                                        <td className="px-4 py-3">
-                                            {license.status !== 'validated' && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => handleValidateLicense(license.id)}
-                                                >
-                                                    Valider
-                                                </Button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </section>
+                )}
 
                 {/* Paiements */}
-                <section className="rounded-lg border">
-                    <div className="border-b px-4 py-3">
-                        <h2 className="text-base font-semibold">Paiements</h2>
+                {payments.length > 0 && (
+                    <div>
+                        <h2 className="mb-2 px-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                            Paiements
+                        </h2>
+                        <div className="space-y-2">
+                            {payments.map((payment) => (
+                                <div
+                                    key={payment.id}
+                                    className="flex items-center justify-between rounded-xl border p-4"
+                                >
+                                    <div>
+                                        <p className="font-medium">{fmt(payment.amount)}</p>
+                                        <p className="text-muted-foreground text-xs">
+                                            {payment.method_label || '—'} · {payment.created_at}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant={colorToVariant(payment.status_color)}>
+                                            {payment.status_label}
+                                        </Badge>
+                                        {payment.status !== 'validated' && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => handleValidatePayment(payment.id)}
+                                            >
+                                                <Check className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    {payments.length === 0 ? (
-                        <p className="text-muted-foreground px-4 py-6 text-sm">Aucun paiement enregistré.</p>
-                    ) : (
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b bg-muted/50">
-                                    <th className="px-4 py-2 text-left font-medium">Montant</th>
-                                    <th className="px-4 py-2 text-left font-medium">Méthode</th>
-                                    <th className="px-4 py-2 text-left font-medium">Statut</th>
-                                    <th className="px-4 py-2 text-left font-medium">Référence</th>
-                                    <th className="px-4 py-2 text-left font-medium">Date</th>
-                                    <th className="px-4 py-2 text-left font-medium">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {payments.map((payment) => (
-                                    <tr key={payment.id} className="border-b last:border-0">
-                                        <td className="px-4 py-3 font-medium">{formatMoney(payment.amount)}</td>
-                                        <td className="text-muted-foreground px-4 py-3">{payment.method_label}</td>
-                                        <td className="px-4 py-3">
-                                            <Badge variant={colorToVariant(payment.status_color)}>
-                                                {payment.status_label}
-                                            </Badge>
-                                        </td>
-                                        <td className="text-muted-foreground px-4 py-3">
-                                            {payment.reference ?? '—'}
-                                        </td>
-                                        <td className="text-muted-foreground px-4 py-3">{payment.created_at}</td>
-                                        <td className="px-4 py-3">
-                                            {payment.status !== 'validated' && (
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => handleValidatePayment(payment.id)}
-                                                >
-                                                    Valider
-                                                </Button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </section>
+                )}
+
+                {licenses.length === 0 && payments.length === 0 && (
+                    <div className="rounded-xl border border-dashed p-6 text-center">
+                        <p className="text-muted-foreground text-sm">Aucune donnée pour ce joueur.</p>
+                    </div>
+                )}
             </div>
         </>
     );

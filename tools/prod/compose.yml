@@ -1,0 +1,60 @@
+services:
+
+  # ── Applications ───────────────────────────────────────────────────────────
+  backend:
+    image: registry.thehawk970.space/thehawk970/bad_asso:latest
+    restart: unless-stopped
+    user: "33:33"
+    environment:
+      SSL_MODE: "off"
+      APP_ENV: "local"
+      APP_DEBUG: "true"
+      APP_URL: "https://bad.thehawk970.space"
+      ASSET_URL: "https://bad.thehawk970.space"
+      AUTORUN_LARAVEL_MIGRATION: "true"
+      AUTORUN_LARAVEL_CONFIG_CACHE: "true"
+      AUTORUN_LARAVEL_ROUTE_CACHE: "true"
+      AUTORUN_LARAVEL_VIEW_CACHE: "true"
+    networks:
+      - internal
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flow.rule=Host(`bad.thehawk970.space`)"
+      - "traefik.http.routers.flow.entrypoints=websecure"
+      - "traefik.http.routers.flow.tls.certresolver=letsencrypt"
+      - "traefik.http.services.flow.loadbalancer.server.port=8080"
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    env_file: .env.dockhand
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-db}
+      POSTGRES_USER: ${DB_USERNAME:-db}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:5432:5432
+    networks:
+      - internal
+
+networks:
+  internal:
+  proxy:
+    external: true
+
+volumes:
+  acme:
+    driver: local
+  caddy-data:
+    driver: local
+  caddy-config:
+    driver: local
+  storage:
+    driver: local
+  flow-storage:
+    driver: local
+  postgres_data:
+    driver: local

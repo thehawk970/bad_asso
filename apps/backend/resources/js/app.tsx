@@ -3,8 +3,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
-import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
+import MobileLayout from '@/layouts/mobile-layout';
 
 const queryClient = new QueryClient();
 
@@ -24,16 +24,8 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
-        switch (true) {
-            case name === 'welcome':
-                return null;
-            case name.startsWith('auth/'):
-                return AuthLayout;
-            case name.startsWith('companion/'):
-                return null;
-            default:
-                return AppLayout;
-        }
+        if (name.startsWith('auth/')) return AuthLayout;
+        return MobileLayout;
     },
     strictMode: true,
     withApp(app) {
