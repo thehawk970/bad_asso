@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import fs from 'node:fs';
 import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 const httpsConfig =
     process.env.VITE_SERVER_KEY && process.env.VITE_SERVER_CERT
@@ -40,6 +41,66 @@ export default defineConfig({
         tailwindcss(),
         wayfinder({
             formVariants: true,
+        }),
+        VitePWA({
+            registerType: 'autoUpdate',
+            injectRegister: 'auto',
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+                navigateFallback: null,
+                runtimeCaching: [
+                    {
+                        urlPattern: /^https?:\/\/.*\/api\/.*/i,
+                        handler: 'NetworkFirst',
+                        options: {
+                            cacheName: 'api-cache',
+                            expiration: { maxEntries: 50, maxAgeSeconds: 300 },
+                        },
+                    },
+                    {
+                        urlPattern: ({ request }) => request.mode === 'navigate',
+                        handler: 'NetworkFirst',
+                        options: {
+                            cacheName: 'pages-cache',
+                            expiration: { maxEntries: 50, maxAgeSeconds: 86400 },
+                        },
+                    },
+                ],
+            },
+            manifest: {
+                name: 'Badminton Belvésois',
+                short_name: 'Bad Belvésois',
+                description: 'Gestion du club Badminton Belvésois',
+                theme_color: '#18181b',
+                background_color: '#ffffff',
+                display: 'standalone',
+                orientation: 'portrait',
+                start_url: '/',
+                scope: '/',
+                icons: [
+                    {
+                        src: 'pwa-64x64.png',
+                        sizes: '64x64',
+                        type: 'image/png',
+                    },
+                    {
+                        src: 'pwa-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                    },
+                    {
+                        src: 'pwa-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                    },
+                    {
+                        src: 'maskable-icon-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable',
+                    },
+                ],
+            },
         }),
     ],
 });
