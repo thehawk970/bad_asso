@@ -28,7 +28,6 @@ services:
   postgres:
     image: postgres:16
     restart: unless-stopped
-    env_file: .env.dockhand
     environment:
       POSTGRES_DB: ${DB_DATABASE:-db}
       POSTGRES_USER: ${DB_USERNAME:-db}
