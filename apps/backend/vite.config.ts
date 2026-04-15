@@ -44,19 +44,17 @@ export default defineConfig({
         }),
         VitePWA({
             registerType: 'autoUpdate',
-            injectRegister: 'auto',
+            // L'injection auto ne fonctionne pas avec Blade — on enregistre manuellement dans app.tsx
+            injectRegister: null,
+            // Mettre sw.js à la racine public/ pour que la scope soit /
+            outDir: 'public',
+            // Indiquer au SW où se trouvent les assets buildés
+            buildBase: '/build/',
             workbox: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+                globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
+                globDirectory: 'public/build',
                 navigateFallback: null,
                 runtimeCaching: [
-                    {
-                        urlPattern: /^https?:\/\/.*\/api\/.*/i,
-                        handler: 'NetworkFirst',
-                        options: {
-                            cacheName: 'api-cache',
-                            expiration: { maxEntries: 50, maxAgeSeconds: 300 },
-                        },
-                    },
                     {
                         urlPattern: ({ request }) => request.mode === 'navigate',
                         handler: 'NetworkFirst',
@@ -79,22 +77,22 @@ export default defineConfig({
                 scope: '/',
                 icons: [
                     {
-                        src: 'pwa-64x64.png',
+                        src: '/pwa-64x64.png',
                         sizes: '64x64',
                         type: 'image/png',
                     },
                     {
-                        src: 'pwa-192x192.png',
+                        src: '/pwa-192x192.png',
                         sizes: '192x192',
                         type: 'image/png',
                     },
                     {
-                        src: 'pwa-512x512.png',
+                        src: '/pwa-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
                     },
                     {
-                        src: 'maskable-icon-512x512.png',
+                        src: '/maskable-icon-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'maskable',

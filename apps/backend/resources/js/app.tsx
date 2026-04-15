@@ -1,3 +1,4 @@
+import { registerSW } from 'virtual:pwa-register';
 import { createInertiaApp } from '@inertiajs/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -38,3 +39,5 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+registerSW({ immediate: true });

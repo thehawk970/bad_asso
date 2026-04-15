@@ -125,6 +125,9 @@ importers:
       vite:
         specifier: ^8.0.0
         version: 8.0.8(@types/node@22.19.17)(jiti@2.6.1)(terser@5.46.1)
+      workbox-window:
+        specifier: ^7.4.0
+        version: 7.4.0
     devDependencies:
       '@eslint/js':
         specifier: ^9.19.0
