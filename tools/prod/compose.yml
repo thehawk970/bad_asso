@@ -5,6 +5,7 @@ services:
     image: registry.thehawk970.space/thehawk970/bad_asso:latest
     restart: unless-stopped
     user: "33:33"
+    env_file: .env.dockhand
     environment:
       SSL_MODE: "off"
       APP_ENV: "local"
