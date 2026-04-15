@@ -27,7 +27,7 @@ export default function Welcome({ pendingOrders }: Props) {
             <Head title="Accueil" />
 
             {/* Header */}
-            <div className="bg-background sticky top-14 z-10 border-b px-4 py-4">
+            <div className="bg-background sticky top-0 z-10 border-b px-4 py-4">
                 <h1 className="text-xl font-bold">BadManager</h1>
             </div>
 

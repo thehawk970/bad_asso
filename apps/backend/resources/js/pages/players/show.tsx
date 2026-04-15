@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -78,12 +78,12 @@ export default function PlayersShow({ player, licenses, payments }: Props) {
             <Head title={player.full_name} />
 
             {/* Header sticky */}
-            <div className="bg-background sticky top-14 z-10 border-b px-4 py-3">
+            <div className="bg-background sticky top-0 z-10 border-b px-4 py-3">
                 <div className="flex items-center gap-3">
                     <Link href="/players" className="text-muted-foreground hover:text-foreground">
                         <ArrowLeft className="h-5 w-5" />
                     </Link>
-                    <h1 className="truncate text-lg font-bold">{player.full_name}</h1>
+                    <h1 className="min-w-0 flex-1 truncate text-lg font-bold">{player.full_name}</h1>
                 </div>
             </div>
 
@@ -102,6 +102,12 @@ export default function PlayersShow({ player, licenses, payments }: Props) {
                             <p className="text-muted-foreground text-sm">{player.phone}</p>
                         )}
                     </div>
+                    <Link href={`/companion/order?player_id=${player.id}`} className="shrink-0">
+                        <div className="bg-primary text-primary-foreground flex h-16 w-32 flex-col items-center justify-center gap-1 rounded-xl">
+                            <ShoppingCart className="h-6 w-6" />
+                            <span className="text-xs font-medium">Commande</span>
+                        </div>
+                    </Link>
                 </div>
 
                 {/* Statuts rapides */}

@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { useMutation } from '@tanstack/react-query';
 import { ArrowLeft, Check, Minus, Plus, ShoppingCart } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,7 @@ type Props = {
     players: CompanionPlayer[];
     products: CompanionProduct[];
     paymentMethods: PaymentMethodOption[];
+    initialPlayer: CompanionPlayer | null;
 };
 
 type Step = 'player' | 'products' | 'payment' | 'success';
@@ -88,7 +89,7 @@ function PlayerStep({
 
     return (
         <div className="flex min-h-[calc(100dvh-7.5rem)] flex-col">
-            <div className="bg-background sticky top-14 z-10 border-b px-4 pb-3 pt-4">
+            <div className="bg-background sticky top-0 z-10 border-b px-4 pb-3 pt-4">
                 <p className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">
                     Étape 1 / 3
                 </p>
@@ -162,7 +163,7 @@ function ProductsStep({
 
     return (
         <div className="flex min-h-[calc(100dvh-7.5rem)] flex-col">
-            <div className="bg-background sticky top-14 z-10 border-b px-4 pb-3 pt-4">
+            <div className="bg-background sticky top-0 z-10 border-b px-4 pb-3 pt-4">
                 <div className="mb-2 flex items-center gap-2">
                     <button onClick={onBack} className="text-muted-foreground hover:text-foreground">
                         <ArrowLeft className="h-5 w-5" />
@@ -287,7 +288,7 @@ function PaymentStep({
 
     return (
         <div className="flex min-h-[calc(100dvh-7.5rem)] flex-col">
-            <div className="bg-background sticky top-14 z-10 border-b px-4 pb-3 pt-4">
+            <div className="bg-background sticky top-0 z-10 border-b px-4 pb-3 pt-4">
                 <div className="mb-2 flex items-center gap-2">
                     <button onClick={onBack} className="text-muted-foreground hover:text-foreground">
                         <ArrowLeft className="h-5 w-5" />
@@ -323,17 +324,14 @@ function PaymentStep({
 
                 {/* Méthode de règlement */}
                 <div>
-                    <h2 className="mb-3 text-sm font-semibold">
-                        Méthode de règlement
-                        <span className="text-muted-foreground ml-1 font-normal">(optionnel)</span>
-                    </h2>
+                    <h2 className="mb-3 text-sm font-semibold">Méthode de règlement</h2>
                     <div className="grid grid-cols-2 gap-2">
                         {paymentMethods.map((method) => (
                             <button
                                 key={method.value}
                                 onClick={() => setSelectedMethod(method.value)}
                                 className={cn(
-                                    'flex min-h-[3.5rem] items-center justify-center rounded-xl border-2 px-3 py-2 text-sm font-medium transition-all active:scale-95',
+                                    'flex min-h-14 items-center justify-center rounded-xl border-2 px-3 py-2 text-sm font-medium transition-all active:scale-95',
                                     selectedMethod === method.value
                                         ? 'border-primary bg-primary text-primary-foreground'
                                         : 'border-border bg-card hover:border-primary/60',
@@ -342,6 +340,19 @@ function PaymentStep({
                                 {method.label}
                             </button>
                         ))}
+
+                        {/* Paiement ultérieur — option danger */}
+                        <button
+                            onClick={() => setSelectedMethod('__deferred__')}
+                            className={cn(
+                                'col-span-2 flex min-h-14 items-center justify-center rounded-xl border-2 px-3 py-2 text-sm font-medium transition-all active:scale-95',
+                                selectedMethod === '__deferred__'
+                                    ? 'border-destructive bg-destructive text-destructive-foreground'
+                                    : 'border-destructive/50 bg-card text-destructive hover:border-destructive hover:bg-destructive/5',
+                            )}
+                        >
+                            Paiement ultérieur
+                        </button>
                     </div>
                 </div>
 
@@ -368,14 +379,20 @@ function PaymentStep({
 
                 <Button
                     className="h-14 w-full text-base font-semibold"
+                    variant={selectedMethod === '__deferred__' ? 'destructive' : 'default'}
                     disabled={isPending}
-                    onClick={() => onConfirm(selectedMethod, isPickedUp)}
+                    onClick={() => onConfirm(
+                        selectedMethod === '__deferred__' ? null : selectedMethod,
+                        isPickedUp,
+                    )}
                 >
                     {isPending
                         ? 'Création en cours…'
-                        : selectedMethod
-                          ? 'Confirmer la commande'
-                          : 'Enregistrer sans paiement'}
+                        : selectedMethod === '__deferred__'
+                          ? 'Enregistrer — payer plus tard'
+                          : selectedMethod
+                            ? 'Confirmer la commande'
+                            : 'Enregistrer sans paiement'}
                 </Button>
             </div>
         </div>
@@ -429,11 +446,18 @@ function SuccessStep({
 
 // ─── Page principale ──────────────────────────────────────────────────────────
 
-export default function CompanionOrder({ players, products, paymentMethods }: Props) {
-    const [step, setStep] = useState<Step>('player');
-    const [selectedPlayer, setSelectedPlayer] = useState<CompanionPlayer | null>(null);
+export default function CompanionOrder({ players, products, paymentMethods, initialPlayer }: Props) {
+    const [step, setStep] = useState<Step>(initialPlayer ? 'products' : 'player');
+    const [selectedPlayer, setSelectedPlayer] = useState<CompanionPlayer | null>(initialPlayer ?? null);
     const [cart, setCart] = useState<Map<number, CartItem>>(new Map());
     const [createdOrder, setCreatedOrder] = useState<CreatedOrder | null>(null);
+
+    // Si on revient à l'étape 1 après un reset, on repart de zéro (pas de pré-sélection)
+    useEffect(() => {
+        if (step === 'player') {
+            setSelectedPlayer(null);
+        }
+    }, [step]);
 
     const { mutate: createOrder, isPending } = useMutation({
         mutationFn: (payload: CreateOrderPayload) => companionApi.createOrder(payload),

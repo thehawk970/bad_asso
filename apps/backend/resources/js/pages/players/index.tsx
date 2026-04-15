@@ -47,7 +47,7 @@ export default function PlayersIndex({ players }: Props) {
             <Head title="Joueurs" />
 
             {/* Header sticky */}
-            <div className="bg-background sticky top-14 z-10 border-b px-4 pb-3 pt-4">
+            <div className="bg-background sticky top-0 z-10 border-b px-4 pb-3 pt-4">
                 <div className="mb-3 flex items-center justify-between">
                     <h1 className="text-xl font-bold">Joueurs</h1>
                     <span className="text-muted-foreground text-sm">{players.length} inscrits</span>

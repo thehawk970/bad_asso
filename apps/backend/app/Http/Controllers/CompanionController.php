@@ -25,7 +25,7 @@ class CompanionController extends Controller
 {
     // ─── Pages Inertia ──────────────────────────────────────────────────────────
 
-    public function showOrderWizard(): Response
+    public function showOrderWizard(Request $request): Response
     {
         $players = Player::orderBy('last_name')
             ->orderBy('first_name')
@@ -51,7 +51,20 @@ class CompanionController extends Controller
         $paymentMethods = collect(PaymentMethod::cases())
             ->map(fn (PaymentMethod $m) => ['value' => $m->value, 'label' => $m->label()]);
 
-        return Inertia::render('companion/order', compact('players', 'products', 'paymentMethods'));
+        $initialPlayer = null;
+        if ($request->filled('player_id')) {
+            $player = Player::find($request->integer('player_id'));
+            if ($player) {
+                $initialPlayer = [
+                    'id'             => $player->id,
+                    'full_name'      => $player->full_name,
+                    'ffbad_category' => $player->ffbad_category,
+                    'license_status' => $player->licenses()->latest()->first()?->status->value,
+                ];
+            }
+        }
+
+        return Inertia::render('companion/order', compact('players', 'products', 'paymentMethods', 'initialPlayer'));
     }
 
     public function showPlayer(Player $player): Response
@@ -87,7 +100,7 @@ class CompanionController extends Controller
             'items'          => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.quantity'   => ['required', 'integer', 'min:1'],
-            'payment_method' => ['required', 'string', 'in:'.implode(',', array_column(PaymentMethod::cases(), 'value'))],
+            'payment_method' => ['nullable', 'string', 'in:'.implode(',', array_column(PaymentMethod::cases(), 'value'))],
             'is_picked_up'   => ['boolean'],
         ]);
 
@@ -111,7 +124,10 @@ class CompanionController extends Controller
             }
 
             $orderService->handleAfterCreate($order, $licenseService);
-            $orderService->markAsPaid($order, PaymentMethod::from($validated['payment_method']));
+
+            if (isset($validated['payment_method'])) {
+                $orderService->markAsPaid($order, PaymentMethod::from($validated['payment_method']));
+            }
 
             /** @var Order $fresh */
             $fresh = $order->fresh(['player', 'items.product']);
