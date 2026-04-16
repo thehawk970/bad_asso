@@ -18,7 +18,7 @@ class PlayerController extends Controller
     public function index(): Response
     {
         $players = Player::with([
-            'licenses' => fn ($q) => $q->latest()->limit(1),
+            'licenses' => fn ($q) => $q->with('season')->latest()->limit(1),
             'payments' => fn ($q) => $q->latest()->limit(1),
         ])
             ->orderBy('last_name')
@@ -32,7 +32,10 @@ class PlayerController extends Controller
                 'phone' => $player->phone,
                 'has_valid_license' => $player->has_valid_license,
                 'has_valid_payment' => $player->has_valid_payment,
-                'latest_license' => $player->licenses->first()?->only(['status', 'season']),
+                'latest_license' => ($l = $player->licenses->first()) ? [
+                    'status' => $l->status->value,
+                    'season' => $l->season?->name,
+                ] : null,
                 'latest_payment' => $player->payments->first()?->only(['status', 'amount']),
             ]);
 

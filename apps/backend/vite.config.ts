@@ -44,8 +44,8 @@ export default defineConfig({
         }),
         VitePWA({
             registerType: 'autoUpdate',
-            // L'injection auto ne fonctionne pas avec Blade — on enregistre manuellement dans app.tsx
             injectRegister: null,
+            devOptions: { enabled: true },
             // Mettre sw.js à la racine public/ pour que la scope soit /
             outDir: 'public',
             // Indiquer au SW où se trouvent les assets buildés
